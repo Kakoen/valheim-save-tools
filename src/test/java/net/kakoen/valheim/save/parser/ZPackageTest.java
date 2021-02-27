@@ -6,8 +6,6 @@ import java.io.IOException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import net.kakoen.valheim.save.parser.ZPackage;
-
 public class ZPackageTest {
 	
 	@Test

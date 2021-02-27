@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.kakoen.valheim.save.archive.save.DeadZdo;
 import net.kakoen.valheim.save.archive.save.Meta;
 import net.kakoen.valheim.save.archive.save.RandomEvent;
-import net.kakoen.valheim.save.parser.ZPackage;
 import net.kakoen.valheim.save.archive.save.Zdo;
-import net.kakoen.valheim.save.struct.ZdoId;
 import net.kakoen.valheim.save.archive.save.Zones;
+import net.kakoen.valheim.save.parser.ZPackage;
+import net.kakoen.valheim.save.struct.ZdoId;
 
 /**
  * Reads the *.db save files

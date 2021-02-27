@@ -10,13 +10,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import net.kakoen.valheim.save.parser.ZPackage;
-import net.kakoen.valheim.save.struct.ZdoId;
 import net.kakoen.valheim.save.archive.ValheimSaveReaderHints;
 import net.kakoen.valheim.save.decode.ReverseHashcodeLookup;
+import net.kakoen.valheim.save.parser.ZPackage;
 import net.kakoen.valheim.save.struct.Quaternion;
 import net.kakoen.valheim.save.struct.Vector2i;
 import net.kakoen.valheim.save.struct.Vector3;
+import net.kakoen.valheim.save.struct.ZdoId;
 
 @Data
 @NoArgsConstructor
