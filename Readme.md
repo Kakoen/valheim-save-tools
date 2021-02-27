@@ -6,7 +6,7 @@ This tool is a basic prototype for parsing save files (.db) and metadata files (
 
 Build the project with `gradlew shadowJar`. Then use the produced `build/libs/valheim-save-tools-x.x.x-all.jar`.
 
-This project uses Lombok (www.project-lombok.org) to prevent boilerplate code. To fix compile errors
+This project uses Lombok (https://projectlombok.org/) to prevent boilerplate code. To fix compile errors
 in your IDE, make sure you have a plugin installed for that.
 
 ## Running
