@@ -1,10 +1,14 @@
 # Valheim Save Tools
 
-This tool is a basic prototype for parsing save files (.db) and metadata files (.fwl) from Valheim, and outputs them to JSON files.
+This tool parses Valheim save files, and outputs them to JSON files. The following formats are supported:
+* World data files (.db)
+* World metadata files (.fwl)
+* Character files (.fch)
 
 ## Building
 
-Build the project with `gradlew shadowJar`. Then use the produced `build/libs/valheim-save-tools-x.x.x-all.jar`.
+Build the project with `gradlew shadowJar`, a jar with all dependencies included will be created.
+Use the produced `build/libs/valheim-save-tools-x.x.x-all.jar`.
 
 This project uses Lombok (https://projectlombok.org/) to prevent boilerplate code. To fix compile errors
 in your IDE, make sure you have a plugin installed for that.
