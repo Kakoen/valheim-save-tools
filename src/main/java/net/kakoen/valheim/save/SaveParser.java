@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.kakoen.valheim.save.archive.ValheimCharacter;
 import net.kakoen.valheim.save.archive.ValheimSaveArchive;
 import net.kakoen.valheim.save.archive.ValheimSaveMetadata;
 import net.kakoen.valheim.save.archive.ValheimSaveReaderHints;
@@ -48,6 +49,15 @@ public class SaveParser {
 				objectToWrite = new ValheimSaveArchive(inputFile, ValheimSaveReaderHints.builder().resolveNames(true).build());
 			} catch(IOException e) {
 				log.error("Failed to read save file {}", inputFile.getAbsolutePath(), e);
+				System.exit(1);
+			}
+		}
+		
+		if(inputFile.getName().endsWith(".fch")) {
+			try {
+				objectToWrite = new ValheimCharacter(inputFile);
+			} catch(IOException e) {
+				log.error("Failed to read character file {}", inputFile.getAbsolutePath(), e);
 				System.exit(1);
 			}
 		}

@@ -6,6 +6,9 @@ import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.Stack;
 import java.util.function.Function;
 
 import lombok.extern.slf4j.Slf4j;
@@ -72,14 +75,22 @@ public class ZPackage implements AutoCloseable {
 	 * versions that are not supported yet.
 	 */
 	public <R> R readFixedSizeObject(long count, Function<ZPackage, R> reader) {
-		long position = getPosition();
+		int position = getPosition();
+		if(position + count > buffer.limit()) {
+			throw new IllegalStateException("Failed to read fixed size object at " + position + ", end of object is past end of file");
+		}
 		try {
 			return reader.apply(this);
 		} finally {
 			if(getPosition() != position + count) {
-				log.debug("Object was not fully read at {}, {} bytes remain", position, (position + count) - getPosition());
+				log.warn("Object at {} with size {} was not fully read, {} bytes remain", position, count, (position + count) - getPosition());
+				log.warn("At " + new Throwable().getStackTrace()[1]);
 			}
-			setPosition((int)(position + count));
+			if(getPosition() > position + count) {
+				log.warn("Fixed size object at {} was read past expected size {}, {} extra bytes were read", position, count, getPosition() - position - count);
+				log.warn("At " + new Throwable().getStackTrace()[1]);
+			}
+			setPosition((int) (position + count));
 		}
 	}
 	
@@ -108,7 +119,7 @@ public class ZPackage implements AutoCloseable {
 	}
 	
 	public int readChar() {
-		int result = 0;
+		int startPosition = getPosition();
 		int first = buffer.get();
 		int second = 0;
 		int third = 0;
@@ -134,45 +145,58 @@ public class ZPackage implements AutoCloseable {
 			fourth = buffer.get() & 0x3F;
 			return (first << 18) | (second << 12) | (third << 6) | fourth;
 		}
-		throw new IllegalStateException("Unable to read char");
+		throw new IllegalStateException("Unable to read char at position " + startPosition + ", not a valid UTF-8 character");
 	}
 	
 	public String readString() {
+		int startPosition = getPosition();
 		int stringLength = readStringLength();
-		String result = new String(readBytes(stringLength));
-		return result;
+		if(getPosition() + stringLength > buffer.limit()) {
+			throw new IllegalStateException("Reading string at " + startPosition + " with length " + stringLength + " would exceed the end of the file");
+		}
+		return new String(readBytes(stringLength));
 	}
 	
 	public int readStringLength() {
-		int length = buffer.get();
-		int length2 = 0;
-		int length3 = 0;
-		int length4 = 0;
-		int length5 = 0;
-		if(length < 0) {
-			length = length & 0x7F;
-			length2 = buffer.get();
-			if(length2 < 0) {
-				length2 = length2 & 0x7F;
-				length3 = buffer.get();
-				if(length3 < 0) {
-					length3 = length3 & 0x7F;
-					length4 = buffer.get();
-					if(length4 < 0) {
-						length4 = length4 & 0x7F;
-						length5 = buffer.get();
-						if(length5 < 0) throw new RuntimeException("Limit of readString reached");
-					}
-				}
+		int startPosition = getPosition();
+		Stack<Integer> lengthStack = new Stack<>();
+		
+		while(true) {
+			byte length = buffer.get();
+			lengthStack.push(length & 0x7F);
+			if(length >= 0) {
+				break;
+			}
+			if(lengthStack.size() > 4) {
+				throw new IllegalStateException("String length cannot be read at position " + startPosition);
 			}
 		}
-		return (length5 << 28) + (length4 << 21) + (length3 << 14) + (length2 << 7) + length;
+		
+		int result = 0;
+		while(lengthStack.size() > 0) {
+			result = (result << 7) + lengthStack.pop();
+		}
+		return result;
 	}
 	
 	@Override
 	public void close() throws IOException {
-		if(aFile != null) {
-			aFile.close();
+		if(getPosition() < buffer.limit()) {
+			log.warn("File not fully read, {} bytes remain", buffer.limit() - getPosition());
 		}
+		aFile.close();
+	}
+	
+	public byte[] readByteArray() {
+		return readBytes(readInt32());
+	}
+	
+	public Set<String> readStringSet() {
+		int count = readInt32();
+		Set<String> result = new LinkedHashSet<>();
+		for(int i = 0; i < count; i++) {
+			result.add(readString());
+		}
+		return result;
 	}
 }
