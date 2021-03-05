@@ -59,7 +59,7 @@ public class ValheimCharacter {
 			if(zPackage.readBool()) {
 				playerData = zPackage.readFixedSizeObject(zPackage.readInt32(), PlayerData::new);
 			}
-			zPackage.readByteArray(); //hash
+			zPackage.readLengthPrefixedByteArray(); //hash
 		}
 	}
 

@@ -32,7 +32,7 @@ public class WorldPlayerData {
 		}
 		homePoint = zPackage.readVector3();
 		if(version >= 29 && zPackage.readBool()) {
-			mapData = zPackage.readByteArray();
+			mapData = zPackage.readLengthPrefixedByteArray();
 		}
 	}
 	
