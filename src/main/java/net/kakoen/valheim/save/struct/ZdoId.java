@@ -18,4 +18,9 @@ public class ZdoId {
 		userId = zPackage.readLong();
 		id = zPackage.readUInt();
 	}
+	
+	public void save(ZPackage writer) {
+		writer.writeLong(userId);
+		writer.writeUInt(id);
+	}
 }

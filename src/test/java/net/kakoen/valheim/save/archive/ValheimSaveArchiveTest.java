@@ -12,9 +12,18 @@ import org.junit.jupiter.api.Test;
 public class ValheimSaveArchiveTest {
 	
 	@Test
-	public void valheimSave_shouldCorrectlyLoadSave() throws IOException {
-		ValheimSaveArchive valheimSave = new ValheimSaveArchive(new File("src/test/resources/DM20022026.db"), ValheimSaveReaderHints.builder().build());
-		Assertions.assertEquals(26, valheimSave.getMeta().getWorldVersion());
+	public void valheimSaveArchive_shouldCorrectlyLoadSave() throws IOException {
+		ValheimSaveArchive valheimSaveArchive = new ValheimSaveArchive(new File("src/test/resources/DM20022026.db"), ValheimSaveReaderHints.builder().build());
+		Assertions.assertEquals(26, valheimSaveArchive.getMeta().getWorldVersion());
+	}
+	
+	@Test
+	public void valheimSaveArchive_shouldCorrectlySave() throws IOException {
+		File inFile = new File("src/test/resources/DM20022026.db");
+		ValheimSaveArchive valheimSaveArchive = new ValheimSaveArchive(inFile, ValheimSaveReaderHints.builder().build());
+		File outFile = File.createTempFile("out", ".db");
+		valheimSaveArchive.save(outFile);
+		AssertionHelper.assertZPackageEqual(inFile, outFile);
 	}
 	
 }

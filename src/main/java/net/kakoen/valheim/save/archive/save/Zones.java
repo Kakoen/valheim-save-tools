@@ -21,14 +21,16 @@ public class Zones {
 	private List<String> globalKeys = new ArrayList<>();
 	private boolean locationsGenerated = false;
 	private List<PrefabLocation> prefabLocations = new ArrayList<>();
+	private int pgwVersion;
+	private int locationVersion;
 	
 	public void load(ZPackage reader, int version) {
 		int generatedZonesCount = reader.readInt32();
 		for(int i = 0; i < generatedZonesCount; i++) {
 			generatedZones.add(reader.readVector2i());
 		}
-		int pgwVersion = reader.readInt32();
-		int locationVersion = version >= 21 ? reader.readInt32() : 0;
+		pgwVersion = reader.readInt32();
+		locationVersion = version >= 21 ? reader.readInt32() : 0;
 		
 		if(version >= 14) {
 			int globalKeyCount = reader.readInt32();
@@ -41,9 +43,25 @@ public class Zones {
 		
 		int prefabLocationsCount = reader.readInt32();
 		for(int i = 0; i < prefabLocationsCount; i++) {
-			prefabLocations.add(new PrefabLocation(reader.readString(), reader.readVector3(), reader.readBool()));
+			prefabLocations.add(new PrefabLocation(reader));
 		}
 		
 		log.info("Loaded {} locations", prefabLocations.size());
+	}
+	
+	public void save(ZPackage writer) {
+		writer.writeInt32(generatedZones.size());
+		generatedZones.forEach(writer::writeVector2i);
+		
+		writer.writeInt32(pgwVersion);
+		writer.writeInt32(locationVersion);
+		
+		writer.writeInt32(globalKeys.size());
+		globalKeys.forEach(writer::writeString);
+		
+		writer.writeBool(locationsGenerated);
+		
+		writer.writeInt32(prefabLocations.size());
+		prefabLocations.forEach(prefabLocation -> prefabLocation.save(writer));
 	}
 }

@@ -1,8 +1,10 @@
 package net.kakoen.valheim.save.archive.save;
 
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import lombok.AllArgsConstructor;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import net.kakoen.valheim.save.archive.ValheimSaveReaderHints;
 import net.kakoen.valheim.save.decode.ReverseHashcodeLookup;
+import net.kakoen.valheim.save.decode.StableHashCode;
 import net.kakoen.valheim.save.parser.ZPackage;
 import net.kakoen.valheim.save.struct.Quaternion;
 import net.kakoen.valheim.save.struct.Vector2i;
@@ -68,86 +71,90 @@ public class Zdo {
 	 * @param hints Hints that affect processing the zdo
 	 * @return
 	 */
-	public Zdo(ZdoId uid, ZPackage zPackage, int worldVersion, ValheimSaveReaderHints hints) {
-		this.uid = uid;
-		this.ownerRevision = zPackage.readUInt();
-		this.dataRevision = zPackage.readUInt();
-		this.persistent = zPackage.readBool();
-		this.owner = zPackage.readLong();
-		this.timeCreated = zPackage.readLong();
-		this.pgwVersion = zPackage.readInt32();
-		if(worldVersion >= 16 && worldVersion < 24) {
-			zPackage.readInt32();
-		}
-		if(worldVersion >= 23) {
-			this.type = zPackage.readByte();
-		}
-		if(worldVersion >= 22) {
-			this.distant = zPackage.readBool();
-		}
-		if(worldVersion >= 17) {
-			this.prefab = zPackage.readInt32();
-			if(hints.isResolveNames()) {
-				prefabName = Optional.ofNullable(ReverseHashcodeLookup.lookup(this.prefab)).orElse(null);
+	public Zdo(ZPackage zPackage, int worldVersion, ValheimSaveReaderHints hints) {
+		this.uid = new ZdoId(zPackage);
+		zPackage.readLengthPrefixedObject(reader -> {
+			this.ownerRevision = reader.readUInt();
+			this.dataRevision = reader.readUInt();
+			this.persistent = reader.readBool();
+			this.owner = reader.readLong();
+			this.timeCreated = reader.readLong();
+			this.pgwVersion = reader.readInt32();
+			if(worldVersion >= 16 && worldVersion < 24) {
+				reader.readInt32();
 			}
-		}
-		this.sector = zPackage.readVector2i();
-		this.position = zPackage.readVector3();
-		this.rotation = zPackage.readQuaternion();
-		
-		int floatCount = zPackage.readChar();
-		if(floatCount > 0) {
-			floats = new LinkedHashMap<>();
-			floatsByName = new LinkedHashMap<>();
-			for(int i = 0; i < floatCount; i++) {
-				readValue(zPackage, ZPackage::readSingle, floatsByName, floats, hints.isResolveNames());
+			if(worldVersion >= 23) {
+				this.type = reader.readByte();
 			}
-		}
-		
-		int numVector3 = zPackage.readChar();
-		if(numVector3 > 0) {
-			vector3s = new LinkedHashMap<>();
-			vector3sByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
-			for(int i = 0; i < numVector3; i++) {
-				readValue(zPackage, ZPackage::readVector3, vector3sByName, vector3s, hints.isResolveNames());
+			if(worldVersion >= 22) {
+				this.distant = reader.readBool();
 			}
-		}
-		
-		int quatCount = zPackage.readChar();
-		if(quatCount > 0) {
-			quats = new LinkedHashMap<>();
-			quatsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
-			for(int i = 0; i < quatCount; i++) {
-				readValue(zPackage, ZPackage::readQuaternion, quatsByName, quats, hints.isResolveNames());
+			if(worldVersion >= 17) {
+				this.prefab = reader.readInt32();
+				if(hints.isResolveNames()) {
+					prefabName = Optional.ofNullable(ReverseHashcodeLookup.lookup(this.prefab)).orElse(null);
+				}
 			}
-		}
-		
-		int intCount = zPackage.readChar();
-		if(intCount > 0) {
-			ints = new LinkedHashMap<>();
-			intsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
-			for(int i = 0; i < intCount; i++) {
-				readValue(zPackage, ZPackage::readInt32, intsByName, ints, hints.isResolveNames());
+			this.sector = reader.readVector2i();
+			this.position = reader.readVector3();
+			this.rotation = reader.readQuaternion();
+			
+			int floatCount = reader.readChar();
+			if(floatCount > 0) {
+				floats = new LinkedHashMap<>();
+				floatsByName = new LinkedHashMap<>();
+				for(int i = 0; i < floatCount; i++) {
+					readValue(reader, ZPackage::readSingle, floatsByName, floats, hints.isResolveNames());
+				}
 			}
-		}
-		
-		int longCount = zPackage.readChar();
-		if(longCount > 0) {
-			longs = new LinkedHashMap<>();
-			longsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
-			for(int i = 0; i < longCount; i++) {
-				readValue(zPackage, ZPackage::readLong, longsByName, longs, hints.isResolveNames());
+			
+			int numVector3 = reader.readChar();
+			if(numVector3 > 0) {
+				vector3s = new LinkedHashMap<>();
+				vector3sByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
+				for(int i = 0; i < numVector3; i++) {
+					readValue(reader, ZPackage::readVector3, vector3sByName, vector3s, hints.isResolveNames());
+				}
 			}
-		}
-		
-		int stringCount = zPackage.readChar();
-		if(stringCount > 0) {
-			strings = new LinkedHashMap<>();
-			stringsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
-			for(int i = 0; i < stringCount; i++) {
-				readValue(zPackage, ZPackage::readString, stringsByName, strings, hints.isResolveNames());
+			
+			int quatCount = reader.readChar();
+			if(quatCount > 0) {
+				quats = new LinkedHashMap<>();
+				quatsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
+				for(int i = 0; i < quatCount; i++) {
+					readValue(reader, ZPackage::readQuaternion, quatsByName, quats, hints.isResolveNames());
+				}
 			}
-		}
+			
+			int intCount = reader.readChar();
+			if(intCount > 0) {
+				ints = new LinkedHashMap<>();
+				intsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
+				for(int i = 0; i < intCount; i++) {
+					readValue(reader, ZPackage::readInt32, intsByName, ints, hints.isResolveNames());
+				}
+			}
+			
+			int longCount = reader.readChar();
+			if(longCount > 0) {
+				longs = new LinkedHashMap<>();
+				longsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
+				for(int i = 0; i < longCount; i++) {
+					readValue(reader, ZPackage::readLong, longsByName, longs, hints.isResolveNames());
+				}
+			}
+			
+			int stringCount = reader.readChar();
+			if(stringCount > 0) {
+				strings = new LinkedHashMap<>();
+				stringsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
+				for(int i = 0; i < stringCount; i++) {
+					readValue(reader, ZPackage::readString, stringsByName, strings, hints.isResolveNames());
+				}
+			}
+			
+			return Zdo.this;
+		});
 	}
 	
 	private <T> void readValue(ZPackage zPackage, Function<ZPackage, T> valueReader, Map<String, T> byName, Map<Integer, T> byHash, boolean resolveNames) {
@@ -161,4 +168,58 @@ public class Zdo {
 		}
 	}
 	
+	public void save(ZPackage zPackage) {
+		uid.save(zPackage);
+		zPackage.writeLengthPrefixedObject(writer -> {
+			writer.writeUInt(ownerRevision);
+			writer.writeUInt(dataRevision);
+			writer.writeBool(persistent);
+			writer.writeLong(owner);
+			writer.writeLong(timeCreated);
+			writer.writeInt32(pgwVersion);
+			writer.writeByte(type);
+			writer.writeBool(distant);
+			writer.writeInt32(prefab);
+			writer.writeVector2i(sector);
+			writer.writeVector3(position);
+			writer.writeQuaternion(rotation);
+			
+			writeProperties(writer, floats, floatsByName, writer::writeSingle);
+			writeProperties(writer, vector3s, vector3sByName, writer::writeVector3);
+			writeProperties(writer, quats, quatsByName, writer::writeQuaternion);
+			writeProperties(writer, ints, intsByName, writer::writeInt32);
+			writeProperties(writer, longs, longsByName, writer::writeLong);
+			writeProperties(writer, strings, stringsByName, writer::writeString);
+		});
+	}
+	
+	private <T> void writeProperties(ZPackage writer, Map<Integer, T> valuesByHash, Map<String, T> valuesByName, Consumer<T> writeFunction) {
+		Map<Integer, T> map = new LinkedHashMap<>();
+		if(valuesByHash != null) {
+			map.putAll(valuesByHash);
+		}
+		if(valuesByName != null) {
+			valuesByName.forEach((k, v) -> {
+				map.put(StableHashCode.getStableHashCode(k), v);
+			});
+		}
+		writer.writeChar(map.size());
+		map.forEach((k, v) -> {
+			writer.writeInt32(k);
+			writeFunction.accept(v);
+		});
+	}
+	
+	private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes(StandardCharsets.US_ASCII);
+	public static String bytesToHex(byte[] bytes) {
+		byte[] hexChars = new byte[bytes.length * 3];
+		for (int j = 0; j < bytes.length; j++) {
+			int v = bytes[j] & 0xFF;
+			hexChars[j * 3] = HEX_ARRAY[v >>> 4];
+			hexChars[j * 3 + 1] = HEX_ARRAY[v & 0x0F];
+			hexChars[j * 3 + 2] = ' ';
+		}
+		return new String(hexChars, StandardCharsets.UTF_8);
+	}
 }
+

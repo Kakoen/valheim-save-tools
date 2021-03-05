@@ -15,7 +15,6 @@ import net.kakoen.valheim.save.archive.save.RandomEvent;
 import net.kakoen.valheim.save.archive.save.Zdo;
 import net.kakoen.valheim.save.archive.save.Zones;
 import net.kakoen.valheim.save.parser.ZPackage;
-import net.kakoen.valheim.save.struct.ZdoId;
 
 /**
  * Reads the *.db save files
@@ -29,6 +28,9 @@ public class ValheimSaveArchive {
 	
 	private Meta meta;
 	private long modified;
+	
+	private long myId;
+	private long nextUid;
 	
 	private Zones zones;
 	private RandomEvent randomEvent;
@@ -52,39 +54,48 @@ public class ValheimSaveArchive {
 			zones = new Zones();
 			zones.load(zPackage, meta.getWorldVersion());
 			
-			randomEvent = loadRandomEvent(zPackage, meta.getWorldVersion());
+			randomEvent = new RandomEvent(zPackage);
 		}
 	}
 	
+	public void save(File file) throws IOException {
+		try(ZPackage zPackage = new ZPackage()) {
+			zPackage.writeInt32(meta.getWorldVersion());
+			zPackage.writeDouble(meta.getNetTime());
+			writeZdos(zPackage);
+			zPackage.writeTo(file);
+		}
+	}
+	
+	public void writeZdos(ZPackage writer) {
+		writer.writeLong(myId);
+		writer.writeUInt(nextUid);
+		
+		writer.writeInt32(zdoList.size());
+		zdoList.forEach(zdo -> zdo.save(writer));
+		
+		writer.writeInt32(deadZdos.size());
+		deadZdos.forEach(deadZdo -> deadZdo.save(writer));
+		
+		zones.save(writer);
+		
+		randomEvent.save(writer);
+	}
+	
 	private void loadZdos(ZPackage reader, int version, ValheimSaveReaderHints hints) {
-		reader.readLong();
-		long someCount = reader.readUInt();
+		myId = reader.readLong();
+		nextUid = reader.readUInt();
 		int numberOfZdos = reader.readInt32();
 		for(int i = 0; i < numberOfZdos; i++) {
-			ZdoId zdoId = new ZdoId(reader);
-			int count = reader.readInt32();
-			Zdo zdo = reader.readFixedSizeObject(count, (zPackage) -> new Zdo(zdoId, zPackage, version, hints));
-			zdo.setUid(zdoId);
-			zdoList.add(zdo);
+			zdoList.add(new Zdo(reader, version, hints));
 		}
 		log.info("Loaded {} zdos", zdoList.size());
 		
 		int deadZdoCount = reader.readInt32();
 		for(int i = 0; i < deadZdoCount; i++) {
-			ZdoId zdoId = new ZdoId(reader);
-			DeadZdo deadZdo = new DeadZdo(zdoId, reader.readLong());
-			deadZdos.add(deadZdo);
+			deadZdos.add(new DeadZdo(reader));
 		}
 		log.info("Loaded {} dead zdos", deadZdos.size());
-	}
-	
-	private RandomEvent loadRandomEvent(ZPackage reader, int version) {
-		RandomEvent randomEvent = new RandomEvent();
-		randomEvent.setEventTimer(reader.readSingle());
-		randomEvent.setName(reader.readString());
-		randomEvent.setNum(reader.readSingle());
-		randomEvent.setPosition(reader.readVector3());
-		return randomEvent;
 	}
 	
 }

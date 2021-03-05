@@ -23,8 +23,8 @@ import net.kakoen.valheim.save.struct.Vector3;
 @Slf4j
 public class ZPackage implements AutoCloseable {
 	
-	private final static int INITIAL_CAPACITY = 1024;
-	private final static float EXPAND_FACTOR = 2f;
+	private final static int INITIAL_CAPACITY = 4096;
+	private final static float EXPAND_FACTOR = 1.5f;
 	
 	private ByteBuffer buffer;
 	
@@ -54,7 +54,7 @@ public class ZPackage implements AutoCloseable {
 		while (newCapacity < (buffer.capacity() + needed)) {
 			newCapacity *= EXPAND_FACTOR;
 		}
-		log.info("Expanding capacity from {} to {}", buffer.capacity(), newCapacity);
+		log.debug("Expanding capacity from {} to {}", buffer.capacity(), newCapacity);
 		ByteBuffer expanded = ByteBuffer.allocate(newCapacity);
 		expanded.order(buffer.order());
 		int position = buffer.position();
@@ -318,7 +318,7 @@ public class ZPackage implements AutoCloseable {
 		if(getPosition() + stringLength > buffer.limit()) {
 			throw new IllegalStateException("Reading string at " + startPosition + " with length " + stringLength + " would exceed the end of the file");
 		}
-		return new String(readBytes(stringLength));
+		return new String(readBytes(stringLength), StandardCharsets.UTF_8);
 	}
 	
 	public void writeString(String value) {
@@ -350,13 +350,19 @@ public class ZPackage implements AutoCloseable {
 	}
 	
 	public void writeStringLength(int value) {
+		if(value == 0) {
+			writeUByte((short)0);
+			return;
+		}
+		
 		int length = value;
 		Stack<Short> encodedLength = new Stack<>();
+		
 		while(length > 0) {
-			short l = (short)(length & 0x7F);
+			short l = (short) (length & 0x7F);
 			length = length >> 7;
-			if(length > 0) {
-				l = (short)(l | 0x80);
+			if (length > 0) {
+				l = (short) (l | 0x80);
 			}
 			encodedLength.push(l);
 		}
