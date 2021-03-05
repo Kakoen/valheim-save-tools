@@ -67,7 +67,7 @@ public class ValheimSaveArchive {
 		}
 	}
 	
-	public void writeZdos(ZPackage writer) {
+	private void writeZdos(ZPackage writer) {
 		writer.writeLong(myId);
 		writer.writeUInt(nextUid);
 		

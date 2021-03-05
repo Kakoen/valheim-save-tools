@@ -123,7 +123,7 @@ public class PlayerData {
 		int foodsCount = zPackage.readInt32();
 		foods = new ArrayList<>();
 		for(int i = 0; i < foodsCount; i++) {
-			foods.add(new Food(zPackage.readString(), zPackage.readSingle(), zPackage.readSingle()));
+			foods.add(new Food(zPackage));
 		}
 		
 		readSkills(zPackage);
@@ -141,6 +141,58 @@ public class PlayerData {
 		for(int i = 0; i < skillCount; i++) {
 			skills.put(zPackage.readInt32(), new Skill(zPackage.readSingle(), zPackage.readSingle()));
 		}
+	}
+	
+	public void save(ZPackage writer) {
+		writer.writeInt32(version);
+		writer.writeSingle(maxHealth);
+		writer.writeSingle(health);
+		writer.writeSingle(stamina);
+		writer.writeBool(firstSpawn);
+		writer.writeSingle(timeSinceDeath);
+		writer.writeString(guardianPower);
+		writer.writeSingle(guardianPowerCooldown);
+		inventory.save(writer);
+		
+		writer.writeStringSet(knownRecipes);
+		
+		writer.writeInt32(knownStations.size());
+		knownStations.forEach((k, v) -> {
+			writer.writeString(k);
+			writer.writeInt32(v);
+		});
+		
+		writer.writeStringSet(knownMaterials);
+		writer.writeStringSet(shownTutorials);
+		writer.writeStringSet(uniques);
+		writer.writeStringSet(trophies);
+		
+		writer.writeInt32(knownBiomes.size());
+		knownBiomes.forEach((k, v) -> {
+			writer.writeInt32(k);
+		});
+		
+		writer.writeInt32(knownTexts.size());
+		knownTexts.forEach((k, v) -> {
+			writer.writeString(k);
+			writer.writeString(v);
+		});
+		
+		writer.writeString(beardItem);
+		writer.writeString(hairItem);
+		writer.writeVector3(skinColor);
+		writer.writeVector3(hairColor);
+		writer.writeInt32(modelIndex);
+		
+		writer.writeInt32(foods.size());
+		foods.forEach(food -> food.save(writer));
+		
+		writer.writeInt32(skillsVersion);
+		writer.writeInt32(skills.size());
+		skills.forEach((key, skill) -> {
+			writer.writeInt32(key);
+			skill.save(writer);
+		});
 	}
 }
 

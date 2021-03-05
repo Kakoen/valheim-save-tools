@@ -14,5 +14,15 @@ public class ValheimCharacterTest {
 		Assertions.assertEquals(33, valheimCharacter.getVersion());
 		Assertions.assertEquals("Kakoentest", valheimCharacter.getPlayerName());
 	}
+	
+	@Test
+	public void valheimCharacter_shouldCorrectlySave() throws IOException {
+		File inFile = new File("src/test/resources/Kakoentest.fch");
+		ValheimCharacter valheimCharacter = new ValheimCharacter(inFile);
+		
+		File outFile = File.createTempFile("out", ".fch");
+		valheimCharacter.save(outFile);
+		AssertionHelper.assertZPackageEqual(inFile, outFile);
+	}
 
 }

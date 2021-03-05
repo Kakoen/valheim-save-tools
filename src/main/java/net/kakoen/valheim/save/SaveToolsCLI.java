@@ -72,7 +72,7 @@ public class SaveToolsCLI {
 				}
 				if(outputFile.getName().endsWith(".fch")) {
 					ValheimCharacter valheimCharacter = readJson(inputFile, ValheimCharacter.class);
-					throw new RuntimeException("Converting characters from JSON to .fch is not supported (yet)");
+					valheimCharacter.save(outputFile);
 				}
 				if(outputFile.getName().endsWith(".fwl")) {
 					ValheimSaveMetadata valheimSaveMetadata = readJson(inputFile, ValheimSaveMetadata.class);
@@ -103,7 +103,7 @@ public class SaveToolsCLI {
 		log.info("");
 		log.info("Read JSON and convert back to game data file:");
 		log.info("<infile>: Input JSON file (needs to end with .json)");
-		log.info("<outfile>: Output world save (*.db) or world metadata (*.fwl) file");
+		log.info("<outfile>: Output world save (*.db), world metadata (*.fwl) or character (*.fch) file");
 	}
 	
 	private static <T> void writeJson(T objectToWrite, File outputFile) throws IOException {

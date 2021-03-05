@@ -34,4 +34,15 @@ public class InventoryItem {
 		crafterName = version >= 103 ? zPackage.readString() : "";
 	}
 	
+	public void save(ZPackage writer) {
+		writer.writeString(name);
+		writer.writeInt32(stack);
+		writer.writeSingle(durability);
+		writer.writeVector2i(pos);
+		writer.writeBool(equipped);
+		writer.writeInt32(quality);
+		writer.writeInt32(variant);
+		writer.writeLong(crafterId);
+		writer.writeString(crafterName);
+	}
 }

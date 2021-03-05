@@ -1,6 +1,5 @@
 package net.kakoen.valheim.save.archive.save;
 
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;

@@ -21,4 +21,4 @@ For reading game files:
 Input should specify a .db, .fwl, or .fch file, output is where the json file will be written
 
 For writing game files:
-Input should specify a .json file, output should specify a .db or .fwl file.
+Input should specify a .json file, output should specify a .db, .fwl or .fch file.

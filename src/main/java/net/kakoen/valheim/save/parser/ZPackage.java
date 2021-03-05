@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Stack;
@@ -182,6 +184,21 @@ public class ZPackage implements AutoCloseable {
 		ensureWritableSpace(4 + zPackage.getPosition());
 		writeInt32(zPackage.getPosition());
 		zPackage.writeTo(this);
+	}
+	
+	public void writeLengthPrefixedHashedObject(Consumer<ZPackage> writer) {
+		ZPackage zPackage = new ZPackage();
+		writer.accept(zPackage);
+		ensureWritableSpace(4 + zPackage.getPosition());
+		writeInt32(zPackage.getPosition());
+		byte[] sha512Hash = new byte[64];
+		try {
+			sha512Hash = MessageDigest.getInstance("SHA-512").digest(zPackage.getBufferAsBytes());
+		} catch(NoSuchAlgorithmException e) {
+			log.error("Failed to compute SHA-512 hash", e);
+		}
+		zPackage.writeTo(this);
+		writeLengthPrefixedByteArray(sha512Hash);
 	}
 	
 	private void writeTo(ZPackage zPackage) {

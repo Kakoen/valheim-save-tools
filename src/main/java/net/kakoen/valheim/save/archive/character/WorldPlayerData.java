@@ -36,4 +36,17 @@ public class WorldPlayerData {
 		}
 	}
 	
+	public void save(ZPackage writer) {
+		writer.writeBool(haveCustomSpawnPoint);
+		writer.writeVector3(spawnPoint);
+		writer.writeBool(hasLogoutPoint);
+		writer.writeVector3(logoutPoint);
+		writer.writeBool(hasDeathPoint);
+		writer.writeVector3(deathPoint);
+		writer.writeVector3(homePoint);
+		if(mapData != null) {
+			writer.writeBool(true);
+			writer.writeLengthPrefixedByteArray(mapData);
+		}
+	}
 }

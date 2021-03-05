@@ -25,4 +25,12 @@ public class Inventory {
 			inventoryItems.add(new InventoryItem(zPackage, version));
 		}
 	}
+	
+	public void save(ZPackage writer) {
+		writer.writeInt32(version);
+		writer.writeInt32(inventoryItems.size());
+		inventoryItems.forEach(inventoryItem -> {
+			inventoryItem.save(writer);
+		});
+	}
 }
