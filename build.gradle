@@ -30,8 +30,14 @@ test {
 }
 
 jar {
+    archiveName("${project.name}-lib.jar")
     finalizedBy shadowJar
     manifest {
-        attributes 'Main-Class': 'net.kakoen.valheim.save.SaveParser'
+        attributes 'Main-Class': 'net.kakoen.valheim.save.SaveToolsCLI'
     }
+}
+
+shadowJar {
+    from 'simplelogger.properties'
+    archiveName("${project.name}.jar")
 }
