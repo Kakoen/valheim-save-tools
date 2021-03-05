@@ -26,13 +26,29 @@ public class ValheimSaveMetadata {
 	
 	public ValheimSaveMetadata(File file) throws IOException {
 		try(ZPackage zPackage = new ZPackage(file)) {
-			int size = zPackage.readInt32();
-			worldVersion = zPackage.readInt32();
-			name = zPackage.readString();
-			seedName = zPackage.readString();
-			seed = zPackage.readInt32();
-			uid = zPackage.readLong();
-			worldGenVersion = zPackage.readInt32();
+			zPackage.readLengthPrefixedObject((ZPackage reader) -> {
+				worldVersion = reader.readInt32();
+				name = reader.readString();
+				seedName = reader.readString();
+				seed = reader.readInt32();
+				uid = reader.readLong();
+				worldGenVersion = reader.readInt32();
+				return ValheimSaveMetadata.this;
+			});
+		}
+	}
+	
+	public void save(File file) throws IOException {
+		try(ZPackage zPackage = new ZPackage()) {
+			zPackage.writeLengthPrefixedObject((ZPackage writer) -> {
+				writer.writeInt32(worldVersion);
+				writer.writeString(name);
+				writer.writeString(seedName);
+				writer.writeInt32(seed);
+				writer.writeLong(uid);
+				writer.writeInt32(worldGenVersion);
+			});
+			zPackage.writeTo(file);
 		}
 	}
 

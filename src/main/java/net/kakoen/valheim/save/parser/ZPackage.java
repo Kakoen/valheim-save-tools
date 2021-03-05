@@ -1,6 +1,7 @@
 package net.kakoen.valheim.save.parser;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -10,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,27 +27,24 @@ public class ZPackage implements AutoCloseable {
 	private final static float EXPAND_FACTOR = 2f;
 	
 	private ByteBuffer buffer;
-	private final boolean readOnly;
 	
-	private final RandomAccessFile inFile;
+	private RandomAccessFile inFile;
+	private FileChannel fileChannel;
 	
 	public ZPackage(File inputFile) throws IOException {
 		inFile = new RandomAccessFile(inputFile,"r");
-		FileChannel fileChannel = inFile.getChannel();
-		readOnly = true;
-		buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+		fileChannel = inFile.getChannel();
+		buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size()).asReadOnlyBuffer();
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 	}
 	
 	public ZPackage() {
-		inFile = null;
 		buffer = ByteBuffer.allocate(INITIAL_CAPACITY);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
-		readOnly = false;
 	}
 	
 	private void ensureWritableSpace(int needed) {
-		if(readOnly) {
+		if(buffer.isReadOnly()) {
 			throw new IllegalStateException("Buffer is read-only");
 		}
 		if (buffer.remaining() >= needed) {
@@ -173,18 +172,21 @@ public class ZPackage implements AutoCloseable {
 		}
 	}
 	
-	public <R> R writeLengthPrefixedObject(Function<ZPackage, R> writer) {
+	public <R> R readLengthPrefixedObject(Function<ZPackage, R> reader) {
+		return readFixedSizeObject(readInt32(), reader);
+	}
+	
+	public void writeLengthPrefixedObject(Consumer<ZPackage> writer) {
 		ZPackage zPackage = new ZPackage();
-		R result = writer.apply(zPackage);
+		writer.accept(zPackage);
 		ensureWritableSpace(4 + zPackage.getPosition());
 		writeInt32(zPackage.getPosition());
 		zPackage.writeTo(this);
-		return result;
 	}
 	
 	private void writeTo(ZPackage zPackage) {
-		int size = getPosition();
-		writeBytes(buffer.array(), 0, size);
+		int size = inFile != null ? buffer.capacity() : buffer.position();
+		zPackage.writeBytes(buffer.array(), 0, size);
 	}
 	
 	public boolean readBool() {
@@ -399,6 +401,20 @@ public class ZPackage implements AutoCloseable {
 				log.warn("File not fully read, {} bytes remain", buffer.limit() - getPosition());
 			}
 			inFile.close();
+		}
+		if(fileChannel != null && fileChannel.isOpen()) {
+			fileChannel.close();
+		}
+		inFile = null;
+		fileChannel = null;
+		buffer = null;
+	}
+	
+	public void writeTo(File file) throws IOException {
+		try(FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+			int size = inFile != null ? buffer.capacity() : buffer.position();
+			fileOutputStream.write(buffer.array(), 0, size);
+			log.info("Wrote {} bytes to {}", size, file.getAbsolutePath());
 		}
 	}
 }

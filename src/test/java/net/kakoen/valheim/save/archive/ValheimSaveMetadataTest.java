@@ -12,14 +12,22 @@ import org.junit.jupiter.api.Test;
 public class ValheimSaveMetadataTest {
 	
 	@Test
-	public void valheimSave_shouldCorrectlyLoadMetadata() throws IOException {
-		ValheimSaveMetadata metadata = new ValheimSaveMetadata(new File("src/test/resources/DM20022026.fwl"));
+	public void valheimSaveMetadata_shouldCorrectlyLoadMetadata() throws IOException {
+		File inFile = new File("src/test/resources/DM20022026.fwl");
+		ValheimSaveMetadata metadata = new ValheimSaveMetadata(inFile);
 		Assertions.assertEquals(26, metadata.getWorldVersion());
 		Assertions.assertEquals(1, metadata.getWorldGenVersion());
 		Assertions.assertEquals("DM20022026", metadata.getName());
 		Assertions.assertEquals("wMW3mSL2S0", metadata.getSeedName());
 		Assertions.assertEquals(1707192617, metadata.getSeed());
-		
 	}
 	
+	@Test
+	public void valheimSaveMetadata_shouldCorrectlySaveMetadata() throws IOException {
+		File inFile = new File("src/test/resources/DM20022026.fwl");
+		ValheimSaveMetadata metadata = new ValheimSaveMetadata(inFile);
+		File outFile = File.createTempFile("out", ".fwl");
+		metadata.save(outFile);
+		AssertionHelper.assertZPackageEqual(inFile, outFile);
+	}
 }
