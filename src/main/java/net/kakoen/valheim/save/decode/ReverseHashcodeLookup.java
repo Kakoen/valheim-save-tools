@@ -51,6 +51,8 @@ public class ReverseHashcodeLookup {
 		for(int i = 0; i < 200; i++) {
 			stringList.add("item" + i);
 			stringList.add("room" + i);
+			stringList.add("room" + i + "_rot");
+			stringList.add("room" + i + "_pos");
 			stringList.add("slot" + i);
 			stringList.add("root" + i);
 		}
