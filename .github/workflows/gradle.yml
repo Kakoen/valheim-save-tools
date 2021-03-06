@@ -24,3 +24,8 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+    - name: Upload JAR
+      uses: actions/upload-artifact@v2
+      with:
+        name: valheim-save-tools.jar
+        path: ./build/libs/valheim-save-tools.jar
