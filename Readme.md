@@ -21,11 +21,16 @@ installed for that.
 
 ```
 usage: java -jar valheim-save-tools.jar <infile> [outfile]
-       [--listGlobalKeys] [--removeGlobalKey <arg>] [--skipResolveNames]
+       [--listGlobalKeys] [--removeGlobalKey <arg>] [--resetWorld]
+       [--skipResolveNames]
     --listGlobalKeys          List global keys (.db only)
-    --removeGlobalKey <arg>   Remove a global key (.db only)
+    --removeGlobalKey <arg>   Remove a global key, specify 'all' to remove
+                              all (.db only)
+    --resetWorld              Regenerates all zones that don't have
+                              player-built structures in them
+                              (experimental, .db only)
     --skipResolveNames        Do not resolve names of prefabs and property
-                              keys (.db only)
+                              keys (faster for processing, .db only)
 <infile>: Input file of type .fch, .db, .fwl or .json
 <outfile>: Output file of type .fch, .db, .fwl or .json (optional)
 ```

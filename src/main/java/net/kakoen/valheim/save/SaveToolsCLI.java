@@ -2,6 +2,7 @@ package net.kakoen.valheim.save;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,9 +16,19 @@ import net.kakoen.valheim.save.archive.ValheimCharacter;
 import net.kakoen.valheim.save.archive.ValheimSaveArchive;
 import net.kakoen.valheim.save.archive.ValheimSaveMetadata;
 import net.kakoen.valheim.save.archive.ValheimSaveReaderHints;
+import net.kakoen.valheim.save.processor.ListGlobalKeysProcessor;
+import net.kakoen.valheim.save.processor.RemoveGlobalKeyProcessor;
+import net.kakoen.valheim.save.processor.ResetWorldProcessor;
+import net.kakoen.valheim.save.processor.ValheimArchiveProcessor;
 
 @Slf4j
 public class SaveToolsCLI {
+	
+	private final static List<ValheimArchiveProcessor> PROCESSORS = List.of(
+			new ListGlobalKeysProcessor(),
+			new RemoveGlobalKeyProcessor(),
+			new ResetWorldProcessor()
+	);
 	
 	public static void main(String[] args) {
 		SaveToolsCLIOptions cliOptions = new SaveToolsCLIOptions();
@@ -34,40 +45,15 @@ public class SaveToolsCLI {
 		ValheimArchive inputArchive = readValheimArchive(inputFile, cliOptions);
 		log.info("Archive type: " + inputArchive.getType());
 		
-		if(inputArchive.getType() == ValheimArchiveType.DB) {
-			if(cliOptions.getListGlobalKeys()) {
-				listGlobalKeys((ValheimSaveArchive) inputArchive);
-			}
-			if(cliOptions.getRemoveGlobalKeys() != null) {
-				removeGlobalKeys((ValheimSaveArchive) inputArchive, cliOptions.getRemoveGlobalKeys());
+		for(ValheimArchiveProcessor processor : PROCESSORS) {
+			if(processor.getType() == inputArchive.getType() && processor.isEnabled(cliOptions)) {
+				log.info("Applying processor " + processor.getClass().getSimpleName());
+				processor.process(inputArchive, cliOptions);
 			}
 		}
 		
 		if(cliOptions.getOutputFileName() != null) {
 			saveArchive(inputArchive, new File(cliOptions.getOutputFileName()));
-		}
-	}
-	
-	private static void listGlobalKeys(ValheimSaveArchive valheimSaveArchive) {
-		if(valheimSaveArchive.getZones() == null || valheimSaveArchive.getZones().getGlobalKeys() == null) {
-			log.info("Global keys not present in archive");
-			return;
-		}
-		log.info("Global keys: {}", String.join(", ", valheimSaveArchive.getZones().getGlobalKeys()));
-	}
-	
-	private static void removeGlobalKeys(ValheimSaveArchive valheimSaveArchive, String[] removeGlobalKeys) {
-		if(valheimSaveArchive.getZones() == null || valheimSaveArchive.getZones().getGlobalKeys() == null) {
-			log.info("Global keys not present in archive");
-			return;
-		}
-		for (String removeGlobalKey : removeGlobalKeys) {
-			if (valheimSaveArchive.getZones().getGlobalKeys().remove(removeGlobalKey)) {
-				log.info("Global key {} removed", removeGlobalKey);
-			}
-			else {
-				log.info("Global key {} was not present", removeGlobalKey);
-			}
 		}
 	}
 	

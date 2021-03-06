@@ -13,9 +13,10 @@ import org.apache.commons.cli.ParseException;
 @Slf4j
 public class SaveToolsCLIOptions {
 	
-	private final static Option REMOVE_GLOBAL_KEY_OPTION = new Option(null, "removeGlobalKey", true, "Remove a global key (.db only)");
+	private final static Option REMOVE_GLOBAL_KEY_OPTION = new Option(null, "removeGlobalKey", true, "Remove a global key, specify 'all' to remove all (.db only)");
 	private final static Option LIST_GLOBAL_KEY_OPTION = new Option(null, "listGlobalKeys", false, "List global keys (.db only)");
-	private final static Option SKIP_RESOLVE_NAMES = new Option(null, "skipResolveNames", false, "Do not resolve names of prefabs and property keys (.db only)");
+	private final static Option SKIP_RESOLVE_NAMES = new Option(null, "skipResolveNames", false, "Do not resolve names of prefabs and property keys (faster for processing, .db only)");
+	private final static Option RESET_WORLD = new Option(null, "resetWorld", false, "Regenerates all zones that don't have player-built structures in them (experimental, .db only)");
 	
 	private CommandLine cmd = null;
 	
@@ -35,6 +36,7 @@ public class SaveToolsCLIOptions {
 		options.addOption(SKIP_RESOLVE_NAMES);
 		options.addOption(LIST_GLOBAL_KEY_OPTION);
 		options.addOption(REMOVE_GLOBAL_KEY_OPTION);
+		options.addOption(RESET_WORLD);
 		return options;
 	}
 	
@@ -61,6 +63,10 @@ public class SaveToolsCLIOptions {
 	
 	public boolean isSkipResolveNames() {
 		return cmd.hasOption(SKIP_RESOLVE_NAMES.getLongOpt());
+	}
+	
+	public boolean isResetWorld() {
+		return cmd.hasOption(RESET_WORLD.getLongOpt());
 	}
 	
 	public boolean getListGlobalKeys() {

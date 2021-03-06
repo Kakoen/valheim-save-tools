@@ -19,7 +19,7 @@ import net.kakoen.valheim.save.struct.Vector2i;
 @Slf4j
 public class Zones {
 	
-	private List<Vector2i> generatedZones = new ArrayList<>();
+	private Set<Vector2i> generatedZones = new LinkedHashSet<>();
 	private Set<String> globalKeys = new LinkedHashSet<>();
 	private boolean locationsGenerated = false;
 	private List<PrefabLocation> prefabLocations = new ArrayList<>();
