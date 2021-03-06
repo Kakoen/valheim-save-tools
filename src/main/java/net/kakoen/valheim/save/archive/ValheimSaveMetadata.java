@@ -15,7 +15,7 @@ import net.kakoen.valheim.save.parser.ZPackage;
 @Data
 @NoArgsConstructor
 @Slf4j
-public class ValheimSaveMetadata {
+public class ValheimSaveMetadata implements ValheimArchive {
 	
 	private int worldVersion;
 	private String name;
@@ -38,6 +38,7 @@ public class ValheimSaveMetadata {
 		}
 	}
 	
+	@Override
 	public void save(File file) throws IOException {
 		try(ZPackage zPackage = new ZPackage()) {
 			zPackage.writeLengthPrefixedObject((ZPackage writer) -> {
@@ -51,5 +52,10 @@ public class ValheimSaveMetadata {
 			zPackage.writeTo(file);
 		}
 	}
-
+	
+	@Override
+	public ValheimArchiveType getType() {
+		return ValheimArchiveType.FWL;
+	}
+	
 }

@@ -19,7 +19,7 @@ import net.kakoen.valheim.save.parser.ZPackage;
 @Data
 @NoArgsConstructor
 @Slf4j
-public class ValheimCharacter {
+public class ValheimCharacter implements ValheimArchive {
 	
 	private final static int TESTED_CHARACTER_VERSION = 33;
 	
@@ -66,6 +66,7 @@ public class ValheimCharacter {
 		}
 	}
 	
+	@Override
 	public void save(File file) throws IOException {
 		try(ZPackage zPackage = new ZPackage()) {
 			zPackage.writeLengthPrefixedHashedObject(writer -> {
@@ -94,5 +95,10 @@ public class ValheimCharacter {
 			zPackage.writeTo(file);
 		}
 	}
-
+	
+	@Override
+	public ValheimArchiveType getType() {
+		return ValheimArchiveType.FCH;
+	}
+	
 }

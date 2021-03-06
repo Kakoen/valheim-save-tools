@@ -22,7 +22,7 @@ import net.kakoen.valheim.save.parser.ZPackage;
 @Data
 @NoArgsConstructor
 @Slf4j
-public class ValheimSaveArchive {
+public class ValheimSaveArchive implements ValheimArchive {
 
 	private final static int MAX_TESTED_WORLD_VERSION = 26;
 	
@@ -58,6 +58,7 @@ public class ValheimSaveArchive {
 		}
 	}
 	
+	@Override
 	public void save(File file) throws IOException {
 		try(ZPackage zPackage = new ZPackage()) {
 			zPackage.writeInt32(meta.getWorldVersion());
@@ -65,6 +66,11 @@ public class ValheimSaveArchive {
 			writeZdos(zPackage);
 			zPackage.writeTo(file);
 		}
+	}
+	
+	@Override
+	public ValheimArchiveType getType() {
+		return ValheimArchiveType.DB;
 	}
 	
 	private void writeZdos(ZPackage writer) {

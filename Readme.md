@@ -5,20 +5,27 @@ This tool converts Valheim save files to and from JSON. The following formats ar
 * World metadata files (.fwl)
 * Character files (.fch)
 
+Additionally, some support for basic processing has been added.
+
 ## Building
 
-Build the project with `gradlew shadowJar`, a jar with all dependencies included will be created.
+You'll need to have Java SDK 11 or higher. Build the project with `gradlew shadowJar`, 
+a jar with all dependencies included will be created.
 Use the produced `build/libs/valheim-save-tools.jar`.
 
-This project uses Lombok (https://projectlombok.org/) to prevent boilerplate code. To fix compile errors
-in your IDE, make sure you have a plugin installed for that.
+This project uses Lombok (https://projectlombok.org/) to prevent boilerplate code. 
+To fix compilation errors in your IDE (Eclipe, IntelliJ), make sure you have a plugin 
+installed for that.
 
 ## Running
 
-`java -jar valheim-save-tools.jar <input> <output>`
-
-For reading game files:
-Input should specify a .db, .fwl, or .fch file, output is where the json file will be written
-
-For writing game files:
-Input should specify a .json file, output should specify a .db, .fwl or .fch file.
+```
+usage: java -jar valheim-save-tools.jar <infile> [outfile]
+       [--listGlobalKeys] [--removeGlobalKey <arg>] [--skipResolveNames]
+    --listGlobalKeys          List global keys (.db only)
+    --removeGlobalKey <arg>   Remove a global key (.db only)
+    --skipResolveNames        Do not resolve names of prefabs and property
+                              keys (.db only)
+<infile>: Input file of type .fch, .db, .fwl or .json
+<outfile>: Output file of type .fch, .db, .fwl or .json (optional)
+```

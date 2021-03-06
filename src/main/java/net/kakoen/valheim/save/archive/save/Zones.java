@@ -1,7 +1,9 @@
 package net.kakoen.valheim.save.archive.save;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +20,7 @@ import net.kakoen.valheim.save.struct.Vector2i;
 public class Zones {
 	
 	private List<Vector2i> generatedZones = new ArrayList<>();
-	private List<String> globalKeys = new ArrayList<>();
+	private Set<String> globalKeys = new LinkedHashSet<>();
 	private boolean locationsGenerated = false;
 	private List<PrefabLocation> prefabLocations = new ArrayList<>();
 	private int pgwVersion;

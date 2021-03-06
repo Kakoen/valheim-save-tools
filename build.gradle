@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
+    implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
 
     implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.18'

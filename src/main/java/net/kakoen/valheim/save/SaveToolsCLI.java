@@ -5,8 +5,12 @@ import java.io.IOException;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.cli.ParseException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.kakoen.valheim.save.archive.ValheimArchive;
+import net.kakoen.valheim.save.archive.ValheimArchiveType;
 import net.kakoen.valheim.save.archive.ValheimCharacter;
 import net.kakoen.valheim.save.archive.ValheimSaveArchive;
 import net.kakoen.valheim.save.archive.ValheimSaveMetadata;
@@ -16,94 +20,114 @@ import net.kakoen.valheim.save.archive.ValheimSaveReaderHints;
 public class SaveToolsCLI {
 	
 	public static void main(String[] args) {
-		
-		if(args.length < 2) {
-			showUsage();
-			return;
+		SaveToolsCLIOptions cliOptions = new SaveToolsCLIOptions();
+		try {
+			cliOptions.parseOptions(args);
 		}
-		
-		File inputFile = new File(args[0]);
-		log.info("Input file: {}", inputFile);
-		
-		if(!inputFile.isFile()) {
-			log.error("Input file {} does not exist!", inputFile.getAbsolutePath());
+		catch (ParseException e) {
+			log.error(e.getMessage());
+			cliOptions.printHelp();
 			System.exit(1);
 		}
 		
-		File outputFile = new File(args[1]);
-		log.info("Output file: {}", outputFile);
+		File inputFile = new File(cliOptions.getInputFileName());
+		ValheimArchive inputArchive = readValheimArchive(inputFile, cliOptions);
+		log.info("Archive type: " + inputArchive.getType());
 		
-		if(inputFile.getName().endsWith(".fwl")) {
-			try {
-				writeJson(new ValheimSaveMetadata(inputFile), outputFile);
-			} catch(IOException e) {
-				log.error("Failed to read metadata file {}", inputFile.getAbsolutePath(), e);
-				System.exit(1);
+		if(inputArchive.getType() == ValheimArchiveType.DB) {
+			if(cliOptions.getListGlobalKeys()) {
+				listGlobalKeys((ValheimSaveArchive) inputArchive);
 			}
+			if(cliOptions.getRemoveGlobalKeys() != null) {
+				removeGlobalKeys((ValheimSaveArchive) inputArchive, cliOptions.getRemoveGlobalKeys());
+			}
+		}
+		
+		if(cliOptions.getOutputFileName() != null) {
+			saveArchive(inputArchive, new File(cliOptions.getOutputFileName()));
+		}
+	}
+	
+	private static void listGlobalKeys(ValheimSaveArchive valheimSaveArchive) {
+		if(valheimSaveArchive.getZones() == null || valheimSaveArchive.getZones().getGlobalKeys() == null) {
+			log.info("Global keys not present in archive");
 			return;
 		}
-		
-		if(inputFile.getName().endsWith(".db")) {
-			try {
-				writeJson(new ValheimSaveArchive(inputFile, ValheimSaveReaderHints.builder().resolveNames(true).build()), outputFile);
-			} catch(IOException e) {
-				log.error("Failed to read save file {}", inputFile.getAbsolutePath(), e);
-				System.exit(1);
-			}
+		log.info("Global keys: {}", String.join(", ", valheimSaveArchive.getZones().getGlobalKeys()));
+	}
+	
+	private static void removeGlobalKeys(ValheimSaveArchive valheimSaveArchive, String[] removeGlobalKeys) {
+		if(valheimSaveArchive.getZones() == null || valheimSaveArchive.getZones().getGlobalKeys() == null) {
+			log.info("Global keys not present in archive");
 			return;
 		}
-		
-		if(inputFile.getName().endsWith(".fch")) {
-			try {
-				writeJson(new ValheimCharacter(inputFile), outputFile);
-			} catch(IOException e) {
-				log.error("Failed to read character file {}", inputFile.getAbsolutePath(), e);
-				System.exit(1);
+		for (String removeGlobalKey : removeGlobalKeys) {
+			if (valheimSaveArchive.getZones().getGlobalKeys().remove(removeGlobalKey)) {
+				log.info("Global key {} removed", removeGlobalKey);
 			}
-			return;
-		}
-		
-		if(inputFile.getName().endsWith(".json")) {
-			try {
-				if(outputFile.getName().endsWith(".db")) {
-					ValheimSaveArchive valheimSaveArchive = readJson(inputFile, ValheimSaveArchive.class);
-					valheimSaveArchive.save(outputFile);
-					return;
-				}
-				if(outputFile.getName().endsWith(".fch")) {
-					ValheimCharacter valheimCharacter = readJson(inputFile, ValheimCharacter.class);
-					valheimCharacter.save(outputFile);
-				}
-				if(outputFile.getName().endsWith(".fwl")) {
-					ValheimSaveMetadata valheimSaveMetadata = readJson(inputFile, ValheimSaveMetadata.class);
-					valheimSaveMetadata.save(outputFile);
-					return;
-				}
-			}
-			catch (IOException e) {
-				log.error("Failed to parse JSON file {}", inputFile.getAbsolutePath(), e);
-				System.exit(1);
+			else {
+				log.info("Global key {} was not present", removeGlobalKey);
 			}
 		}
-		
-		showUsage();
+	}
+	
+	private static void saveArchive(ValheimArchive valheimArchive, File outputFile) {
+		ValheimArchiveType outputFileType = ValheimArchiveType.fromFileName(outputFile.getName());
+		if(outputFileType == null) {
+			log.error("Failed to determine archive type of output file {}", outputFile.getAbsolutePath());
+			log.error("Make sure the file name ends with .fch, .db, .fwl or .json");
+			System.exit(1);
+		}
+		try {
+			log.info("Saving {} to {}", outputFileType, outputFile.getAbsolutePath());
+			switch (outputFileType) {
+				case FWL:
+				case DB:
+				case FCH:
+					if(valheimArchive.getType() != outputFileType) {
+						log.error("Make sure the input file type and output file type (extensions) are compatible");
+						System.exit(1);
+					}
+					valheimArchive.save(outputFile);
+					break;
+				case JSON:
+					writeJson(valheimArchive, outputFile);
+					break;
+			}
+		} catch(IOException e) {
+			log.error("Failed to write output file {}", outputFile.getAbsolutePath(), e);
+			System.exit(1);
+		}
+	}
+	
+	private static ValheimArchive readValheimArchive(File inputFile, SaveToolsCLIOptions cliOptions) {
+		log.info("Reading from {}", inputFile.getAbsolutePath());
+		ValheimArchiveType inputFileType = ValheimArchiveType.fromFileName(inputFile.getName());
+		if(inputFileType == null) {
+			log.error("Unable to determine type of input file {}", inputFile.getAbsolutePath());
+			log.error("Make sure the file name ends with .fch, .db, .fwl or .json");
+			System.exit(1);
+		}
+		try {
+			switch (inputFileType) {
+				case FWL:
+					return new ValheimSaveMetadata(inputFile);
+				case DB:
+					return new ValheimSaveArchive(inputFile, ValheimSaveReaderHints.builder().resolveNames(!cliOptions.isSkipResolveNames()).build());
+				case FCH:
+					return new ValheimCharacter(inputFile);
+				case JSON:
+					return readJson(inputFile, ValheimArchive.class);
+			}
+		} catch(IOException e) {
+			log.error("Failed to read input file {}", inputFile.getAbsolutePath(), e);
+			System.exit(1);
+		}
+		return null;
 	}
 	
 	private static <T> T readJson(File inputFile, Class<T> clazz) throws IOException {
 		return new ObjectMapper().readerFor(clazz).readValue(inputFile);
-	}
-	
-	private static void showUsage() {
-		log.info("Usage:");
-		log.info("java -jar valheim-save-tools.jar <infile> <outfile>");
-		log.info("");
-		log.info("Extract game data to JSON file:");
-		log.info("<infile>: Can be a world save (*.db), world metadata (*.fwl) or character (*.fch) file");
-		log.info("<outfile>: Output json file");
-		log.info("");
-		log.info("Read JSON and convert back to game data file:");
-		log.info("<infile>: Input JSON file (needs to end with .json)");
-		log.info("<outfile>: Output world save (*.db), world metadata (*.fwl) or character (*.fch) file");
 	}
 	
 	private static <T> void writeJson(T objectToWrite, File outputFile) throws IOException {
