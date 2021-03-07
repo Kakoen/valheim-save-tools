@@ -1,22 +1,23 @@
 # Valheim Save Tools
 
-This tool converts Valheim save files to and from JSON. The following formats are supported:
+This repository contains two projects.
+
+* A command line interface tool that converts Valheim save files to and from JSON and processes them.
+* A Java library that can be used in your own Java projects.
+
+The following formats are supported:
 * World data files (.db)
 * World metadata files (.fwl)
 * Character files (.fch)
 
-Additionally, some support for basic processing has been added.
+## Running the Command Line Interface tool
 
-## Building
+There are three ways to get the CLI Tool:
+* Download the [Latest release](https://github.com/Kakoen/valheim-save-tools/releases),
+* Download a [snapshot build](https://github.com/Kakoen/valheim-save-tools/actions/workflows/build.yml) (click on a commit and find the artifact in the bottom)
+* Build the project yourself (see further down)
 
-Build the project with `gradlew build`, a jar `build/libs/valheim-save-tools.jar` with
-all dependencies included will be created.
-
-This project uses Lombok (https://projectlombok.org/) to prevent boilerplate code. 
-To fix compilation errors in your IDE (Eclipe, IntelliJ), make sure you have a plugin 
-installed for that.
-
-## Running
+When you've got your flavour of `valheim-save-tools.jar`, make sure you have Java 11 installed, and use it as follows:
 
 ```
 usage: java -jar valheim-save-tools.jar <infile> [outfile] [--addGlobalKey
@@ -35,9 +36,18 @@ usage: java -jar valheim-save-tools.jar <infile> [outfile] [--addGlobalKey
 <outfile>: Output file of type .fch, .db, .fwl or .json (optional)
 ```
 
+## Building
+
+Build the project with `gradlew build`, a jar `build/libs/valheim-save-tools.jar` with
+all dependencies included will be created.
+
+This project uses Lombok (https://projectlombok.org/) to prevent boilerplate code.
+To fix compilation errors in your IDE (Eclipe, IntelliJ), make sure you have a plugin
+installed for that.
+
 ## Using the library in your Java project
 
-Maven packages are published to Github packages. See https://github.com/Kakoen?tab=packages&repo_name=valheim-save-tools
+From version 1.0.4, the library is published as a Maven package to Github packages. See https://github.com/Kakoen?tab=packages&repo_name=valheim-save-tools
 
 ### Gradle
 
