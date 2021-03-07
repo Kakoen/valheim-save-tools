@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
 
 group rootProject.group
@@ -33,4 +34,23 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        valheimSaveToolsLib(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/kakoen/valheim-save-tools"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("PACKAGES_WRITE_TOKEN")
+            }
+        }
+    }
 }

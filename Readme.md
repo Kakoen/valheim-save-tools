@@ -34,3 +34,35 @@ usage: java -jar valheim-save-tools.jar <infile> [outfile] [--addGlobalKey
 <infile>: Input file of type .fch, .db, .fwl or .json
 <outfile>: Output file of type .fch, .db, .fwl or .json (optional)
 ```
+
+## Using the library in your Java project
+
+Maven packages are published to Github packages. See https://github.com/Kakoen?tab=packages&repo_name=valheim-save-tools
+
+### Gradle
+
+Include the following in your `build.gradle` file to use `valheim-save-tools-lib` as a dependency.
+
+```groovy
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/kakoen/valheim-save-tools")
+        credentials {
+            username = System.getenv("GITHUB_ACTOR")
+            password = System.getenv("PACKAGES_READ_TOKEN")
+        }
+    }
+}
+
+dependencies {
+    implementation group: 'net.kakoen.valheim', name: 'valheim-save-tools-lib', version: '1.0.4-SNAPSHOT'
+}
+```
+
+This requires two environment variables:
+* `GITHUB_ACTOR` Your Github username
+* `PACKAGES_READ_TOKEN` A Github token with at least `read:packages` access. Generate one at https://github.com/settings/tokens
+
+### Maven
+
+See https://docs.github.com/en/packages/guides/configuring-apache-maven-for-use-with-github-packages
