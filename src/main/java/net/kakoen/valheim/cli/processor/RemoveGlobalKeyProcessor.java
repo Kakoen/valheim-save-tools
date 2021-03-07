@@ -1,10 +1,10 @@
-package net.kakoen.valheim.save.processor;
+package net.kakoen.valheim.cli.processor;
 
 import java.util.LinkedHashSet;
 
 import lombok.extern.slf4j.Slf4j;
 
-import net.kakoen.valheim.save.SaveToolsCLIOptions;
+import net.kakoen.valheim.cli.SaveToolsCLIOptions;
 import net.kakoen.valheim.save.archive.ValheimArchive;
 import net.kakoen.valheim.save.archive.ValheimArchiveType;
 import net.kakoen.valheim.save.archive.ValheimSaveArchive;

@@ -9,9 +9,8 @@ Additionally, some support for basic processing has been added.
 
 ## Building
 
-You'll need to have Java SDK 11 or higher. Build the project with `gradlew shadowJar`, 
-a jar with all dependencies included will be created.
-Use the produced `build/libs/valheim-save-tools.jar`.
+Build the project with `gradlew build`, a jar `build/libs/valheim-save-tools.jar` with
+all dependencies included will be created.
 
 This project uses Lombok (https://projectlombok.org/) to prevent boilerplate code. 
 To fix compilation errors in your IDE (Eclipe, IntelliJ), make sure you have a plugin 

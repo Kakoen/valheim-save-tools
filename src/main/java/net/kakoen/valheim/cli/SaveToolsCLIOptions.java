@@ -1,4 +1,4 @@
-package net.kakoen.valheim.save;
+package net.kakoen.valheim.cli;
 
 import lombok.extern.slf4j.Slf4j;
 

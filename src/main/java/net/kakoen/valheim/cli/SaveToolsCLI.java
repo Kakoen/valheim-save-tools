@@ -1,4 +1,4 @@
-package net.kakoen.valheim.save;
+package net.kakoen.valheim.cli;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,11 +16,11 @@ import net.kakoen.valheim.save.archive.ValheimCharacter;
 import net.kakoen.valheim.save.archive.ValheimSaveArchive;
 import net.kakoen.valheim.save.archive.ValheimSaveMetadata;
 import net.kakoen.valheim.save.archive.ValheimSaveReaderHints;
-import net.kakoen.valheim.save.processor.AddGlobalKeyProcessor;
-import net.kakoen.valheim.save.processor.ListGlobalKeysProcessor;
-import net.kakoen.valheim.save.processor.RemoveGlobalKeyProcessor;
-import net.kakoen.valheim.save.processor.ResetWorldProcessor;
-import net.kakoen.valheim.save.processor.ValheimArchiveProcessor;
+import net.kakoen.valheim.cli.processor.AddGlobalKeyProcessor;
+import net.kakoen.valheim.cli.processor.ListGlobalKeysProcessor;
+import net.kakoen.valheim.cli.processor.RemoveGlobalKeyProcessor;
+import net.kakoen.valheim.cli.processor.ResetWorldProcessor;
+import net.kakoen.valheim.cli.processor.ValheimArchiveProcessor;
 
 @Slf4j
 public class SaveToolsCLI {

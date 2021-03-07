@@ -1,6 +1,6 @@
-package net.kakoen.valheim.save.processor;
+package net.kakoen.valheim.cli.processor;
 
-import net.kakoen.valheim.save.SaveToolsCLIOptions;
+import net.kakoen.valheim.cli.SaveToolsCLIOptions;
 import net.kakoen.valheim.save.archive.ValheimArchive;
 import net.kakoen.valheim.save.archive.ValheimArchiveType;
 

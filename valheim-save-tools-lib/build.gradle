@@ -1,14 +1,9 @@
 plugins {
-    id 'java'
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'java-library'
 }
 
-group 'net.kakoen.valheim'
-version '1.0.4-SNAPSHOT'
-
-repositories {
-    mavenCentral()
-}
+group rootProject.group
+version rootProject.version
 
 java {
     toolchain {
@@ -16,16 +11,21 @@ java {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
-    implementation project(':valheim-save-tools-lib')
-    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
-    implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
 
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.1'
+
     testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
+    testRuntime group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
@@ -33,16 +33,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-jar {
-    finalizedBy shadowJar
-    manifest {
-        attributes 'Main-Class': 'net.kakoen.valheim.save.SaveToolsCLI'
-    }
-}
-
-shadowJar {
-    from 'simplelogger.properties'
-    archiveName("${project.name}.jar")
 }
