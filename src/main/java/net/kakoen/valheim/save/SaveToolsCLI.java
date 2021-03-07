@@ -16,6 +16,7 @@ import net.kakoen.valheim.save.archive.ValheimCharacter;
 import net.kakoen.valheim.save.archive.ValheimSaveArchive;
 import net.kakoen.valheim.save.archive.ValheimSaveMetadata;
 import net.kakoen.valheim.save.archive.ValheimSaveReaderHints;
+import net.kakoen.valheim.save.processor.AddGlobalKeyProcessor;
 import net.kakoen.valheim.save.processor.ListGlobalKeysProcessor;
 import net.kakoen.valheim.save.processor.RemoveGlobalKeyProcessor;
 import net.kakoen.valheim.save.processor.ResetWorldProcessor;
@@ -27,6 +28,7 @@ public class SaveToolsCLI {
 	private final static List<ValheimArchiveProcessor> PROCESSORS = List.of(
 			new ListGlobalKeysProcessor(),
 			new RemoveGlobalKeyProcessor(),
+			new AddGlobalKeyProcessor(),
 			new ResetWorldProcessor()
 	);
 	

@@ -20,9 +20,10 @@ installed for that.
 ## Running
 
 ```
-usage: java -jar valheim-save-tools.jar <infile> [outfile]
-       [--listGlobalKeys] [--removeGlobalKey <arg>] [--resetWorld]
+usage: java -jar valheim-save-tools.jar <infile> [outfile] [--addGlobalKey
+       <arg>] [--listGlobalKeys] [--removeGlobalKey <arg>] [--resetWorld]
        [--skipResolveNames]
+    --addGlobalKey <arg>      Adds a global key (.db only)
     --listGlobalKeys          List global keys (.db only)
     --removeGlobalKey <arg>   Remove a global key, specify 'all' to remove
                               all (.db only)

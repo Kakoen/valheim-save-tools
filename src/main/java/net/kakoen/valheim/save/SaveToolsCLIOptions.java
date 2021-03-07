@@ -13,8 +13,9 @@ import org.apache.commons.cli.ParseException;
 @Slf4j
 public class SaveToolsCLIOptions {
 	
-	private final static Option REMOVE_GLOBAL_KEY_OPTION = new Option(null, "removeGlobalKey", true, "Remove a global key, specify 'all' to remove all (.db only)");
 	private final static Option LIST_GLOBAL_KEY_OPTION = new Option(null, "listGlobalKeys", false, "List global keys (.db only)");
+	private final static Option REMOVE_GLOBAL_KEY_OPTION = new Option(null, "removeGlobalKey", true, "Remove a global key, specify 'all' to remove all (.db only)");
+	private final static Option ADD_GLOBAL_KEY_OPTION = new Option(null, "addGlobalKey", true, "Adds a global key (.db only)");
 	private final static Option SKIP_RESOLVE_NAMES = new Option(null, "skipResolveNames", false, "Do not resolve names of prefabs and property keys (faster for processing, .db only)");
 	private final static Option RESET_WORLD = new Option(null, "resetWorld", false, "Regenerates all zones that don't have player-built structures in them (experimental, .db only)");
 	
@@ -36,6 +37,7 @@ public class SaveToolsCLIOptions {
 		options.addOption(SKIP_RESOLVE_NAMES);
 		options.addOption(LIST_GLOBAL_KEY_OPTION);
 		options.addOption(REMOVE_GLOBAL_KEY_OPTION);
+		options.addOption(ADD_GLOBAL_KEY_OPTION);
 		options.addOption(RESET_WORLD);
 		return options;
 	}
@@ -71,5 +73,9 @@ public class SaveToolsCLIOptions {
 	
 	public boolean isListGlobalKeys() {
 		return cmd.hasOption(LIST_GLOBAL_KEY_OPTION.getLongOpt());
+	}
+	
+	public String[] getAddGlobalKeys() {
+		return cmd.getOptionValues(ADD_GLOBAL_KEY_OPTION.getLongOpt());
 	}
 }
