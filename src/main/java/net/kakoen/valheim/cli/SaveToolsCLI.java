@@ -10,6 +10,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.kakoen.valheim.cli.processor.CleanStructuresProcessor;
 import net.kakoen.valheim.save.archive.ValheimArchive;
 import net.kakoen.valheim.save.archive.ValheimArchiveType;
 import net.kakoen.valheim.save.archive.ValheimCharacter;
@@ -29,6 +30,7 @@ public class SaveToolsCLI {
 			new ListGlobalKeysProcessor(),
 			new RemoveGlobalKeyProcessor(),
 			new AddGlobalKeyProcessor(),
+			new CleanStructuresProcessor(),
 			new ResetWorldProcessor()
 	);
 	

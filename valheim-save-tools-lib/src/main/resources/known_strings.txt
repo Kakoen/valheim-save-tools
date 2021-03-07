@@ -908,3 +908,4 @@ item40
 Greyling_ragdoll
 BarleyFlour
 piece_groundtorch
+fire_pit

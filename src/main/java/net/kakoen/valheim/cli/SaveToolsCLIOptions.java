@@ -10,6 +10,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import net.kakoen.valheim.cli.processor.CleanStructuresProcessor;
+
 @Slf4j
 public class SaveToolsCLIOptions {
 	
@@ -18,6 +20,9 @@ public class SaveToolsCLIOptions {
 	private final static Option ADD_GLOBAL_KEY_OPTION = new Option(null, "addGlobalKey", true, "Adds a global key (.db only)");
 	private final static Option SKIP_RESOLVE_NAMES = new Option(null, "skipResolveNames", false, "Do not resolve names of prefabs and property keys (faster for processing, .db only)");
 	private final static Option RESET_WORLD = new Option(null, "resetWorld", false, "Regenerates all zones that don't have player-built structures in them (experimental, .db only)");
+	private final static Option CLEAN_STRUCTURES = new Option(null, "cleanStructures", false, "Cleans up player built structures (.db only)");
+	private final static Option CLEAN_STRUCTURES_THRESHOLD = new Option(null, "cleanStructuresThreshold", true, "Minimum amount of structures to consider as a base (default " + CleanStructuresProcessor.DEFAULT_STRUCTURES_THRESHOLD + ")");
+	private final static Option VERBOSE = new Option("v", "verbose", false, "Print debug output");
 	
 	private CommandLine cmd = null;
 	
@@ -39,6 +44,10 @@ public class SaveToolsCLIOptions {
 		options.addOption(REMOVE_GLOBAL_KEY_OPTION);
 		options.addOption(ADD_GLOBAL_KEY_OPTION);
 		options.addOption(RESET_WORLD);
+		options.addOption(CLEAN_STRUCTURES);
+		options.addOption(CLEAN_STRUCTURES_THRESHOLD);
+		CLEAN_STRUCTURES_THRESHOLD.setType(Integer.class);
+		options.addOption(VERBOSE);
 		return options;
 	}
 	
@@ -75,7 +84,24 @@ public class SaveToolsCLIOptions {
 		return cmd.hasOption(LIST_GLOBAL_KEY_OPTION.getLongOpt());
 	}
 	
+	public boolean isCleanStructures() {
+		return cmd.hasOption(CLEAN_STRUCTURES.getLongOpt());
+	}
+	
+	public Integer getCleanStructuresThreshold() {
+		try {
+			return cmd.hasOption(CLEAN_STRUCTURES_THRESHOLD.getLongOpt()) ? (Integer)cmd.getParsedOptionValue(CLEAN_STRUCTURES_THRESHOLD.getLongOpt()) : null;
+		}
+		catch (ParseException e) {
+			return null;
+		}
+	}
+	
 	public String[] getAddGlobalKeys() {
 		return cmd.getOptionValues(ADD_GLOBAL_KEY_OPTION.getLongOpt());
+	}
+	
+	public boolean isVerbose() {
+		return cmd.hasOption(VERBOSE.getLongOpt());
 	}
 }
