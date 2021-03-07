@@ -29,3 +29,7 @@ jobs:
       with:
         name: valheim-save-tools.jar
         path: ./build/libs/valheim-save-tools.jar
+    - name: Publish SNAPSHOT Maven package
+      run: ./gradlew publish -PonlyPublishSnapshotVersion
+      env:
+        GITHUB_PACKAGES_WRITE_TOKEN: ${{ secrets.PACKAGES_WRITE_TOKEN }}

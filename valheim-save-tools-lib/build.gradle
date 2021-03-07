@@ -37,9 +37,13 @@ test {
 }
 
 publishing {
-    publications {
-        valheimSaveToolsLib(MavenPublication) {
-            from components.java
+    //For CI, we only want to publish when the version ends with SNAPSHOT; we don't want to overwrite releases
+    def onlyPublishSnapshotVersion = rootProject.hasProperty('onlyPublishSnapshotVersion')
+    if(!onlyPublishSnapshotVersion || (onlyPublishSnapshotVersion && version.endsWith("-SNAPSHOT"))) {
+        publications {
+            valheimSaveToolsLib(MavenPublication) {
+                from components.java
+            }
         }
     }
 
