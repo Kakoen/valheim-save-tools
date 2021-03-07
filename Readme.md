@@ -75,4 +75,17 @@ This requires two environment variables:
 
 ### Maven
 
-See https://docs.github.com/en/packages/guides/configuring-apache-maven-for-use-with-github-packages
+See https://docs.github.com/en/packages/guides/configuring-apache-maven-for-use-with-github-packages adding the Github
+repository and setting up authentication for it.
+
+You'll need to add repository url: `https://maven.pkg.github.com/kakoen/valheim-save-tools`
+
+And then add the following dependency:
+
+```xml
+<dependency>
+  <groupId>net.kakoen.valheim</groupId>
+  <artifactId>valheim-save-tools-lib</artifactId>
+  <version>1.0.4-SNAPSHOT</version>
+</dependency>
+```
