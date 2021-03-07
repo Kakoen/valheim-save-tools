@@ -49,7 +49,7 @@ repositories {
         url = uri("https://maven.pkg.github.com/kakoen/valheim-save-tools")
         credentials {
             username = System.getenv("GITHUB_ACTOR")
-            password = System.getenv("PACKAGES_READ_TOKEN")
+            password = System.getenv("GITHUB_PACKAGES_READ_TOKEN")
         }
     }
 }
