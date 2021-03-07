@@ -909,3 +909,12 @@ Greyling_ragdoll
 BarleyFlour
 piece_groundtorch
 fire_pit
+sapling_turnip
+AmberPearl
+item50
+TrophyDeathsquito
+TrophyTheElder
+ArrowIron
+Carrot
+LinenThread
+MeadBaseFrostResist
