@@ -69,7 +69,7 @@ public class SaveToolsCLIOptions {
 		return cmd.hasOption(RESET_WORLD.getLongOpt());
 	}
 	
-	public boolean getListGlobalKeys() {
+	public boolean isListGlobalKeys() {
 		return cmd.hasOption(LIST_GLOBAL_KEY_OPTION.getLongOpt());
 	}
 }

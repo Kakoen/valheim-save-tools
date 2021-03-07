@@ -11,7 +11,7 @@ import net.kakoen.valheim.save.archive.ValheimSaveArchive;
 public class ListGlobalKeysProcessor implements ValheimArchiveProcessor {
 	@Override
 	public boolean isEnabled(SaveToolsCLIOptions options) {
-		return options.getListGlobalKeys();
+		return options.isListGlobalKeys();
 	}
 	
 	@Override
