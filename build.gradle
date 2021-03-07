@@ -38,7 +38,7 @@ test {
 jar {
     finalizedBy shadowJar
     manifest {
-        attributes 'Main-Class': 'net.kakoen.valheim.save.SaveToolsCLI'
+        attributes 'Main-Class': 'net.kakoen.valheim.cli.SaveToolsCLI'
     }
 }
 
