@@ -3,6 +3,7 @@ package net.kakoen.valheim.save.archive.character;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import net.kakoen.valheim.save.parser.ZPackage;
 import net.kakoen.valheim.save.struct.Vector3;
@@ -10,6 +11,7 @@ import net.kakoen.valheim.save.struct.Vector3;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Slf4j
 public class WorldPlayerData {
 	
 	private boolean haveCustomSpawnPoint;
@@ -19,7 +21,7 @@ public class WorldPlayerData {
 	private boolean hasDeathPoint;
 	private Vector3 deathPoint;
 	private Vector3 homePoint;
-	private byte[] mapData;
+	private MapData mapData;
 	
 	public WorldPlayerData(ZPackage zPackage, int version) {
 		haveCustomSpawnPoint = zPackage.readBool();
@@ -32,7 +34,7 @@ public class WorldPlayerData {
 		}
 		homePoint = zPackage.readVector3();
 		if(version >= 29 && zPackage.readBool()) {
-			mapData = zPackage.readLengthPrefixedByteArray();
+			mapData = zPackage.readLengthPrefixedObject(MapData::new);
 		}
 	}
 	
@@ -44,9 +46,9 @@ public class WorldPlayerData {
 		writer.writeBool(hasDeathPoint);
 		writer.writeVector3(deathPoint);
 		writer.writeVector3(homePoint);
+		writer.writeBool(mapData != null);
 		if(mapData != null) {
-			writer.writeBool(true);
-			writer.writeLengthPrefixedByteArray(mapData);
+			writer.writeLengthPrefixedObject(mapData::save);
 		}
 	}
 }
