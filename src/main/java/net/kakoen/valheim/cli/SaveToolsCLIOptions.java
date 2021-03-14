@@ -92,10 +92,12 @@ public class SaveToolsCLIOptions {
 	
 	public Integer getCleanStructuresThreshold() {
 		try {
-			return cmd.hasOption(CLEAN_STRUCTURES_THRESHOLD.getLongOpt()) ? (Integer)cmd.getParsedOptionValue(CLEAN_STRUCTURES_THRESHOLD.getLongOpt()) : null;
+			return cmd.hasOption(CLEAN_STRUCTURES_THRESHOLD.getLongOpt())
+					? Integer.parseInt(cmd.getOptionValue(CLEAN_STRUCTURES_THRESHOLD.getLongOpt()))
+					: null;
 		}
-		catch (ParseException e) {
-			return null;
+		catch (NumberFormatException e) {
+			throw new IllegalArgumentException("Structures threshold must be a number");
 		}
 	}
 	
