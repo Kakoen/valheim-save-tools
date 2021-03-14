@@ -23,6 +23,7 @@ public class SaveToolsCLIOptions {
 	private final static Option CLEAN_STRUCTURES = new Option(null, "cleanStructures", false, "Cleans up player built structures (.db only)");
 	private final static Option CLEAN_STRUCTURES_THRESHOLD = new Option(null, "cleanStructuresThreshold", true, "Minimum amount of structures to consider as a base (default " + CleanStructuresProcessor.DEFAULT_STRUCTURES_THRESHOLD + ")");
 	private final static Option VERBOSE = new Option("v", "verbose", false, "Print debug output");
+	private final static Option FAIL_ON_UNSUPPORTED_VERSION = new Option(null, "failOnUnsupportedVersion", false, "Fail when input archive version is newer than known supported");
 	
 	private CommandLine cmd = null;
 	
@@ -48,6 +49,7 @@ public class SaveToolsCLIOptions {
 		options.addOption(CLEAN_STRUCTURES_THRESHOLD);
 		CLEAN_STRUCTURES_THRESHOLD.setType(Integer.class);
 		options.addOption(VERBOSE);
+		options.addOption(FAIL_ON_UNSUPPORTED_VERSION);
 		return options;
 	}
 	
@@ -103,5 +105,9 @@ public class SaveToolsCLIOptions {
 	
 	public boolean isVerbose() {
 		return cmd.hasOption(VERBOSE.getLongOpt());
+	}
+	
+	public boolean isFailOnUnsupportedVersion() {
+		return cmd.hasOption(FAIL_ON_UNSUPPORTED_VERSION.getLongOpt());
 	}
 }

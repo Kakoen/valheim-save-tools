@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import net.kakoen.valheim.save.archive.hints.ValheimArchiveReaderHints;
+import net.kakoen.valheim.save.exception.ValheimArchiveUnsupportedVersionException;
 import net.kakoen.valheim.save.parser.ZPackage;
 import net.kakoen.valheim.save.struct.Vector3;
 import net.kakoen.valheim.save.struct.ZdoId;
@@ -21,8 +23,8 @@ import net.kakoen.valheim.save.struct.ZdoId;
 @Slf4j
 public class PlayerData {
 	
-	private static final int TESTED_PLAYERDATA_VERSION = 24;
-	private static final int TESTED_SKILLS_VERSION = 2;
+	private static final int MAX_SUPPORTED_PLAYERDATA_VERSION = 24;
+	private static final int MAX_SUPPORTED_SKILLS_VERSION = 2;
 	
 	private int version;
 	private float maxHealth;
@@ -52,10 +54,13 @@ public class PlayerData {
 	private int skillsVersion;
 	private Map<Integer, Skill> skills;
 	
-	public PlayerData(ZPackage zPackage) {
+	public PlayerData(ZPackage zPackage, ValheimArchiveReaderHints hints) throws ValheimArchiveUnsupportedVersionException {
 		version = zPackage.readInt32();
-		if(version > TESTED_PLAYERDATA_VERSION) {
-			log.warn("Player data version {} encountered, last tested version is {}", version, TESTED_PLAYERDATA_VERSION);
+		if(version > MAX_SUPPORTED_PLAYERDATA_VERSION) {
+			if(hints.isFailOnUnsupportedVersion()) {
+				throw new ValheimArchiveUnsupportedVersionException(PlayerData.class, "playerdata", version, MAX_SUPPORTED_PLAYERDATA_VERSION);
+			}
+			log.warn("Player data version {} encountered, last tested version is {}", version, MAX_SUPPORTED_PLAYERDATA_VERSION);
 		}
 		if(version >= 7) {
 			maxHealth = zPackage.readSingle();
@@ -79,7 +84,7 @@ public class PlayerData {
 		if(version == 2) {
 			this.zdoId = new ZdoId(zPackage);
 		}
-		this.inventory = new Inventory(zPackage);
+		this.inventory = new Inventory(zPackage, hints);
 		
 		knownRecipes = zPackage.readStringSet();
 		
@@ -126,14 +131,17 @@ public class PlayerData {
 			foods.add(new Food(zPackage));
 		}
 		
-		readSkills(zPackage);
+		readSkills(zPackage, hints);
 	
 	}
 	
-	private void readSkills(ZPackage zPackage) {
+	private void readSkills(ZPackage zPackage, ValheimArchiveReaderHints hints) throws ValheimArchiveUnsupportedVersionException {
 		skillsVersion = zPackage.readInt32();
-		if(skillsVersion > TESTED_SKILLS_VERSION) {
-			log.warn("Skills version is {}, last tested version is {}", version, TESTED_SKILLS_VERSION);
+		if(skillsVersion > MAX_SUPPORTED_SKILLS_VERSION) {
+			if(hints.isFailOnUnsupportedVersion()) {
+				throw new ValheimArchiveUnsupportedVersionException(PlayerData.class, "skills", skillsVersion, MAX_SUPPORTED_SKILLS_VERSION);
+			}
+			log.warn("Skills version is {}, last tested version is {}", version, MAX_SUPPORTED_SKILLS_VERSION);
 		}
 		
 		int skillCount = zPackage.readInt32();
@@ -144,7 +152,7 @@ public class PlayerData {
 	}
 	
 	public void save(ZPackage writer) {
-		writer.writeInt32(version);
+		writer.writeInt32(MAX_SUPPORTED_PLAYERDATA_VERSION);
 		writer.writeSingle(maxHealth);
 		writer.writeSingle(health);
 		writer.writeSingle(stamina);
@@ -187,7 +195,7 @@ public class PlayerData {
 		writer.writeInt32(foods.size());
 		foods.forEach(food -> food.save(writer));
 		
-		writer.writeInt32(skillsVersion);
+		writer.writeInt32(MAX_SUPPORTED_SKILLS_VERSION);
 		writer.writeInt32(skills.size());
 		skills.forEach((key, skill) -> {
 			writer.writeInt32(key);

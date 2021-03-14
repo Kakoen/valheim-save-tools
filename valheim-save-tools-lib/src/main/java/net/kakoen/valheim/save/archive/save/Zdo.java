@@ -11,9 +11,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import net.kakoen.valheim.save.archive.ValheimSaveReaderHints;
+import net.kakoen.valheim.save.archive.hints.ValheimSaveReaderHints;
 import net.kakoen.valheim.save.decode.ReverseHashcodeLookup;
 import net.kakoen.valheim.save.decode.StableHashCode;
+import net.kakoen.valheim.save.exception.ValheimArchiveUnsupportedVersionException;
 import net.kakoen.valheim.save.parser.ZPackage;
 import net.kakoen.valheim.save.struct.Quaternion;
 import net.kakoen.valheim.save.struct.Vector2i;
@@ -70,7 +71,7 @@ public class Zdo {
 	 * @param hints Hints that affect processing the zdo
 	 * @return
 	 */
-	public Zdo(ZPackage zPackage, int worldVersion, ValheimSaveReaderHints hints) {
+	public Zdo(ZPackage zPackage, int worldVersion, ValheimSaveReaderHints hints) throws ValheimArchiveUnsupportedVersionException {
 		this.uid = new ZdoId(zPackage);
 		zPackage.readLengthPrefixedObject(reader -> {
 			this.ownerRevision = reader.readUInt();

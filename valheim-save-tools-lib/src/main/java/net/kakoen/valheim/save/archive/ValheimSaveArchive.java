@@ -9,11 +9,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import net.kakoen.valheim.save.archive.hints.ValheimSaveReaderHints;
 import net.kakoen.valheim.save.archive.save.DeadZdo;
 import net.kakoen.valheim.save.archive.save.Meta;
 import net.kakoen.valheim.save.archive.save.RandomEvent;
 import net.kakoen.valheim.save.archive.save.Zdo;
 import net.kakoen.valheim.save.archive.save.Zones;
+import net.kakoen.valheim.save.exception.ValheimArchiveUnsupportedVersionException;
 import net.kakoen.valheim.save.parser.ZPackage;
 
 /**
@@ -24,7 +26,7 @@ import net.kakoen.valheim.save.parser.ZPackage;
 @Slf4j
 public class ValheimSaveArchive implements ValheimArchive {
 
-	private final static int MAX_TESTED_WORLD_VERSION = 26;
+	private static final int MAX_SUPPORTED_WORLD_VERSION = 26;
 	
 	private Meta meta;
 	private long modified;
@@ -38,14 +40,17 @@ public class ValheimSaveArchive implements ValheimArchive {
 	private List<Zdo> zdoList = new ArrayList<>();
 	private List<DeadZdo> deadZdos = new ArrayList<>();
 	
-	public ValheimSaveArchive(File file, ValheimSaveReaderHints hints) throws IOException {
+	public ValheimSaveArchive(File file, ValheimSaveReaderHints hints) throws IOException, ValheimArchiveUnsupportedVersionException {
 		meta = new Meta();
 		modified = file.lastModified();
 		meta.setModified(file.lastModified());
 		try(ZPackage zPackage = new ZPackage(file)) {
 			meta.setWorldVersion(zPackage.readInt32());
-			if(meta.getWorldVersion() > MAX_TESTED_WORLD_VERSION) {
-				log.warn("WARNING: world version is {}, the maximum tested world version is {}", meta.getWorldVersion(), MAX_TESTED_WORLD_VERSION);
+			if(meta.getWorldVersion() > MAX_SUPPORTED_WORLD_VERSION) {
+				if(hints.isFailOnUnsupportedVersion()) {
+					throw new ValheimArchiveUnsupportedVersionException(ValheimSaveArchive.class, "world", meta.getWorldVersion(), MAX_SUPPORTED_WORLD_VERSION);
+				}
+				log.warn("WARNING: world version is {}, the maximum tested world version is {}", meta.getWorldVersion(), MAX_SUPPORTED_WORLD_VERSION);
 			}
 			meta.setNetTime(zPackage.readDouble());
 			
@@ -61,7 +66,7 @@ public class ValheimSaveArchive implements ValheimArchive {
 	@Override
 	public void save(File file) throws IOException {
 		try(ZPackage zPackage = new ZPackage()) {
-			zPackage.writeInt32(meta.getWorldVersion());
+			zPackage.writeInt32(MAX_SUPPORTED_WORLD_VERSION);
 			zPackage.writeDouble(meta.getNetTime());
 			writeZdos(zPackage);
 			zPackage.writeTo(file);
@@ -88,7 +93,7 @@ public class ValheimSaveArchive implements ValheimArchive {
 		randomEvent.save(writer);
 	}
 	
-	private void loadZdos(ZPackage reader, int version, ValheimSaveReaderHints hints) {
+	private void loadZdos(ZPackage reader, int version, ValheimSaveReaderHints hints) throws ValheimArchiveUnsupportedVersionException {
 		myId = reader.readLong();
 		nextUid = reader.readUInt();
 		int numberOfZdos = reader.readInt32();

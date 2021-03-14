@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import net.kakoen.valheim.save.archive.character.PlayerData;
 import net.kakoen.valheim.save.archive.character.WorldPlayerData;
+import net.kakoen.valheim.save.archive.hints.ValheimArchiveReaderHints;
+import net.kakoen.valheim.save.exception.ValheimArchiveUnsupportedVersionException;
 import net.kakoen.valheim.save.parser.ZPackage;
 
 /**
@@ -21,7 +23,7 @@ import net.kakoen.valheim.save.parser.ZPackage;
 @Slf4j
 public class ValheimCharacter implements ValheimArchive {
 	
-	private final static int TESTED_CHARACTER_VERSION = 33;
+	private static final int MAX_SUPPORTED_CHARACTER_VERSION = 33;
 	
 	private int version;
 	private int kills;
@@ -34,12 +36,15 @@ public class ValheimCharacter implements ValheimArchive {
 	private String startSeed;
 	private PlayerData playerData;
 	
-	public ValheimCharacter(File file) throws IOException {
+	public ValheimCharacter(File file, ValheimArchiveReaderHints hints) throws IOException, ValheimArchiveUnsupportedVersionException {
 		try (ZPackage zPackage = new ZPackage(file)) {
 			zPackage.readLengthPrefixedObject(reader -> {
 				version = reader.readInt32();
-				if(version > TESTED_CHARACTER_VERSION) {
-					log.warn("Character version {} encountered, last tested version was {}", version, TESTED_CHARACTER_VERSION);
+				if(version > MAX_SUPPORTED_CHARACTER_VERSION) {
+					if(hints.isFailOnUnsupportedVersion()) {
+						throw new ValheimArchiveUnsupportedVersionException(ValheimCharacter.class, "character", version, MAX_SUPPORTED_CHARACTER_VERSION);
+					}
+					log.warn("Character version {} encountered, last tested version was {}", version, MAX_SUPPORTED_CHARACTER_VERSION);
 				}
 				if(version >= 28) {
 					kills = reader.readInt32();
@@ -50,14 +55,14 @@ public class ValheimCharacter implements ValheimArchive {
 				int numWorlds = reader.readInt32();
 				for(int i = 0; i < numWorlds; i++) {
 					long key = reader.readLong();
-					WorldPlayerData worldPlayerData = new WorldPlayerData(reader, version);
+					WorldPlayerData worldPlayerData = new WorldPlayerData(reader, version, hints);
 					worlds.put(key, worldPlayerData);
 				}
 				playerName = reader.readString();
 				playerID = reader.readLong();
 				startSeed = reader.readString();
 				if(reader.readBool()) {
-					playerData = reader.readLengthPrefixedObject(PlayerData::new);
+					playerData = reader.readLengthPrefixedObject(zPackageReader -> new PlayerData(zPackageReader, hints));
 				}
 				return ValheimCharacter.this;
 			});
@@ -70,7 +75,7 @@ public class ValheimCharacter implements ValheimArchive {
 	public void save(File file) throws IOException {
 		try(ZPackage zPackage = new ZPackage()) {
 			zPackage.writeLengthPrefixedHashedObject(writer -> {
-				writer.writeInt32(version);
+				writer.writeInt32(MAX_SUPPORTED_CHARACTER_VERSION);
 				writer.writeInt32(kills);
 				writer.writeInt32(deaths);
 				writer.writeInt32(crafts);

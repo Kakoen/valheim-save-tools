@@ -8,20 +8,23 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.cli.ParseException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.kakoen.valheim.cli.processor.AddGlobalKeyProcessor;
 import net.kakoen.valheim.cli.processor.CleanStructuresProcessor;
+import net.kakoen.valheim.cli.processor.ListGlobalKeysProcessor;
+import net.kakoen.valheim.cli.processor.RemoveGlobalKeyProcessor;
+import net.kakoen.valheim.cli.processor.ResetWorldProcessor;
+import net.kakoen.valheim.cli.processor.ValheimArchiveProcessor;
 import net.kakoen.valheim.save.archive.ValheimArchive;
 import net.kakoen.valheim.save.archive.ValheimArchiveType;
 import net.kakoen.valheim.save.archive.ValheimCharacter;
 import net.kakoen.valheim.save.archive.ValheimSaveArchive;
 import net.kakoen.valheim.save.archive.ValheimSaveMetadata;
-import net.kakoen.valheim.save.archive.ValheimSaveReaderHints;
-import net.kakoen.valheim.cli.processor.AddGlobalKeyProcessor;
-import net.kakoen.valheim.cli.processor.ListGlobalKeysProcessor;
-import net.kakoen.valheim.cli.processor.RemoveGlobalKeyProcessor;
-import net.kakoen.valheim.cli.processor.ResetWorldProcessor;
-import net.kakoen.valheim.cli.processor.ValheimArchiveProcessor;
+import net.kakoen.valheim.save.archive.hints.ValheimArchiveReaderHints;
+import net.kakoen.valheim.save.archive.hints.ValheimSaveReaderHints;
+import net.kakoen.valheim.save.exception.ValheimArchiveUnsupportedVersionException;
 
 @Slf4j
 public class SaveToolsCLI {
@@ -101,34 +104,48 @@ public class SaveToolsCLI {
 		try {
 			switch (inputFileType) {
 				case FWL:
-					return new ValheimSaveMetadata(inputFile);
+					return new ValheimSaveMetadata(
+							inputFile,
+							applyGeneralHints(new ValheimArchiveReaderHints(), cliOptions)
+					);
 				case DB:
-					return new ValheimSaveArchive(inputFile, ValheimSaveReaderHints.builder().resolveNames(!cliOptions.isSkipResolveNames()).build());
+					return new ValheimSaveArchive(
+							inputFile,
+							applyGeneralHints(
+								ValheimSaveReaderHints.builder()
+										.resolveNames(!cliOptions.isSkipResolveNames())
+										.build(),
+								cliOptions
+							));
 				case FCH:
-					return new ValheimCharacter(inputFile);
+					return new ValheimCharacter(
+							inputFile,
+							applyGeneralHints(new ValheimArchiveReaderHints(), cliOptions)
+					);
 				case JSON:
 					return readJson(inputFile, ValheimArchive.class);
 			}
-		} catch(IOException e) {
+		} catch(IOException | ValheimArchiveUnsupportedVersionException e) {
 			log.error("Failed to read input file {}", inputFile.getAbsolutePath(), e);
 			System.exit(1);
 		}
 		return null;
 	}
 	
+	private static <T extends ValheimArchiveReaderHints> T applyGeneralHints(T hints, SaveToolsCLIOptions cliOptions) {
+		hints.setFailOnUnsupportedVersion(cliOptions.isFailOnUnsupportedVersion());
+		return hints;
+	}
+	
 	private static <T> T readJson(File inputFile, Class<T> clazz) throws IOException {
 		return new ObjectMapper().readerFor(clazz).readValue(inputFile);
 	}
 	
-	private static <T> void writeJson(T objectToWrite, File outputFile) throws IOException {
-		try {
-			new ObjectMapper()
-					.writer()
-					.withDefaultPrettyPrinter()
-					.writeValue(outputFile, objectToWrite);
-		} catch(Exception e) {
-			log.error("Failed to write JSON file {}", outputFile, e);
-		}
+	private static <T> void writeJson(T objectToWrite, File outputFile) throws IOException, JsonProcessingException {
+		new ObjectMapper()
+				.writer()
+				.withDefaultPrettyPrinter()
+				.writeValue(outputFile, objectToWrite);
 	}
 	
 }

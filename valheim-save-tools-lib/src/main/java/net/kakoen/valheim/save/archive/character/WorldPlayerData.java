@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import net.kakoen.valheim.save.archive.hints.ValheimArchiveReaderHints;
+import net.kakoen.valheim.save.exception.ValheimArchiveUnsupportedVersionException;
 import net.kakoen.valheim.save.parser.ZPackage;
 import net.kakoen.valheim.save.struct.Vector3;
 
@@ -21,9 +23,9 @@ public class WorldPlayerData {
 	private boolean hasDeathPoint;
 	private Vector3 deathPoint;
 	private Vector3 homePoint;
-	private MapData mapData;
+	private MinimapData mapData;
 	
-	public WorldPlayerData(ZPackage zPackage, int version) {
+	public WorldPlayerData(ZPackage zPackage, int version, ValheimArchiveReaderHints hints) throws ValheimArchiveUnsupportedVersionException {
 		haveCustomSpawnPoint = zPackage.readBool();
 		spawnPoint = zPackage.readVector3();
 		hasLogoutPoint = zPackage.readBool();
@@ -34,7 +36,7 @@ public class WorldPlayerData {
 		}
 		homePoint = zPackage.readVector3();
 		if(version >= 29 && zPackage.readBool()) {
-			mapData = zPackage.readLengthPrefixedObject(MapData::new);
+			mapData = zPackage.readLengthPrefixedObject(reader -> new MinimapData(reader, hints));
 		}
 	}
 	

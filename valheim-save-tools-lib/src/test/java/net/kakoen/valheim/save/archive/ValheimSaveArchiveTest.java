@@ -8,17 +8,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import net.kakoen.valheim.save.archive.hints.ValheimSaveReaderHints;
+import net.kakoen.valheim.save.exception.ValheimArchiveUnsupportedVersionException;
+
 @Slf4j
 public class ValheimSaveArchiveTest {
 	
 	@Test
-	public void valheimSaveArchive_shouldCorrectlyLoadSave() throws IOException {
+	public void valheimSaveArchive_shouldCorrectlyLoadSave() throws IOException, ValheimArchiveUnsupportedVersionException {
 		ValheimSaveArchive valheimSaveArchive = new ValheimSaveArchive(new File("src/test/resources/DM20022026.db"), ValheimSaveReaderHints.builder().build());
 		Assertions.assertEquals(26, valheimSaveArchive.getMeta().getWorldVersion());
 	}
 	
 	@Test
-	public void valheimSaveArchive_shouldCorrectlySave() throws IOException {
+	public void valheimSaveArchive_shouldCorrectlySave() throws IOException, ValheimArchiveUnsupportedVersionException {
 		File inFile = new File("src/test/resources/DM20022026.db");
 		ValheimSaveArchive valheimSaveArchive = new ValheimSaveArchive(inFile, ValheimSaveReaderHints.builder().build());
 		File outFile = File.createTempFile("out", ".db");

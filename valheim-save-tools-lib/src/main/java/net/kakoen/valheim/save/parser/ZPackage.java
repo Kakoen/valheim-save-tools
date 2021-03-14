@@ -14,10 +14,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Stack;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import lombok.extern.slf4j.Slf4j;
 
+import net.kakoen.valheim.save.exception.ValheimArchiveUnsupportedVersionException;
 import net.kakoen.valheim.save.struct.Quaternion;
 import net.kakoen.valheim.save.struct.Vector2i;
 import net.kakoen.valheim.save.struct.Vector3;
@@ -154,7 +154,7 @@ public class ZPackage implements AutoCloseable {
 	 * this makes reading the save a bit more defensive against new
 	 * versions that are not supported yet.
 	 */
-	public <R> R readFixedSizeObject(long count, Function<ZPackage, R> reader) {
+	public <R> R readFixedSizeObject(long count, ZPackageReaderFunction<ZPackage, R> reader) throws ValheimArchiveUnsupportedVersionException {
 		int position = getPosition();
 		if(position + count > buffer.limit()) {
 			throw new IllegalStateException("Failed to read fixed size object at " + position + ", end of object is past end of file");
@@ -174,7 +174,7 @@ public class ZPackage implements AutoCloseable {
 		}
 	}
 	
-	public <R> R readLengthPrefixedObject(Function<ZPackage, R> reader) {
+	public <R> R readLengthPrefixedObject(ZPackageReaderFunction<ZPackage, R> reader) throws ValheimArchiveUnsupportedVersionException {
 		return readFixedSizeObject(readInt32(), reader);
 	}
 	
