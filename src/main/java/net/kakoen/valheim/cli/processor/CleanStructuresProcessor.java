@@ -1,7 +1,7 @@
 package net.kakoen.valheim.cli.processor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,10 +28,17 @@ public class CleanStructuresProcessor implements ValheimArchiveProcessor {
 	
 	private final static Set<Integer> PREFABS_EXCLUDED_FROM_COUNT = Set.of(
 			StableHashCode.getStableHashCode("raise"),
-			StableHashCode.getStableHashCode("cultivate")
+			StableHashCode.getStableHashCode("cultivate"),
+			StableHashCode.getStableHashCode("digg"),
+			StableHashCode.getStableHashCode("paved_road"),
+			StableHashCode.getStableHashCode("mud_road"),
+			StableHashCode.getStableHashCode("path")
 	);
 	
-	public static final int DEFAULT_STRUCTURES_THRESHOLD = 10;
+	/**
+	 * Count before a structure is considered a more permanent base
+	 */
+	public static final int DEFAULT_STRUCTURES_THRESHOLD = 25;
 	
 	@Override
 	public ValheimArchiveType getType() {
@@ -51,61 +58,119 @@ public class CleanStructuresProcessor implements ValheimArchiveProcessor {
 		
 		long zdosBefore = valheimSaveArchive.getZdoList().size();
 		
-		Map<Vector2i, List<Zdo>> playerBuiltStructuresBySector = new HashMap<>();
+		Map<Vector2i, Set<Zdo>> playerBuiltStructuresBySector = new HashMap<>();
 		valheimSaveArchive.getZdoList().stream()
-				.filter(CleanStructuresProcessor::countAsPlayerBuilt)
+				.filter(WorldProcessorUtils::isPlayerBuilt)
 				.forEach(zdo -> playerBuiltStructuresBySector.compute(zdo.getSector(), (k, v) -> {
-					if(v == null) {
-						v = new ArrayList<>();
-					}
+					if(v == null) v = new HashSet<>();
 					v.add(zdo);
 					return v;
 				}));
 		
+		Map<Vector2i, Set<Zdo>> playerBuiltStructuresCountedBySector = new HashMap<>();
+		playerBuiltStructuresBySector.forEach((sector, structures) -> {
+			playerBuiltStructuresCountedBySector.put(sector,
+					structures.stream()
+							.filter(CleanStructuresProcessor::countAsPlayerBuilt)
+							.collect(Collectors.toSet()));
+		});
+		
 		log.info("{} chunks with player built structures found", playerBuiltStructuresBySector.size());
 		
-		List<Vector2i> chunksToClear = new ArrayList<>();
+		Set<Vector2i> chunksToKeep = new HashSet<>();
+		Set<Vector2i> chunksToClear = new HashSet<>();
 		
-		playerBuiltStructuresBySector.forEach((k, v) -> {
-			if(v.size() < structuresThreshold) {
+		playerBuiltStructuresBySector.forEach((sector, structures) -> {
+			int count = playerBuiltStructuresCountedBySector.get(sector).size();
+			if(count < structuresThreshold) {
 				//Check neighbouring sectors, could be that the structure is on the edge of a chunk
-				int count = 0;
-				for(int x = k.getX(); x <= k.getX() + 1; x++) {
-					for(int y = k.getY() - 1; y <= k.getY() + 1; y++) {
-						List<Zdo> structuresInSector = playerBuiltStructuresBySector.get(new Vector2i(x, y));
-						count += (structuresInSector == null ? 0 : structuresInSector.size());
-					}
-				}
-				if(count < structuresThreshold) {
-					//Clear this sector
-					if(options.isVerbose()) {
-						log.info("Adding chunk {} with {} player built structures ({} including neighbouring chunks) to the cleanup list", k, v.size(), count);
-					}
-					chunksToClear.add(k);
-				}
+				count = getNeighbouringSectors(sector, true).stream()
+						.map(neighbour -> {
+							Set<Zdo> structuresInSector = playerBuiltStructuresCountedBySector.get(neighbour);
+							return structuresInSector == null ? 0 : structuresInSector.size();
+						})
+						.reduce(0, Integer::sum);
+			}
+			
+			if(count >= structuresThreshold) {
+				chunksToKeep.add(sector);
+			} else {
+				chunksToClear.add(sector);
 			}
 		});
 		
-		log.info("Clearing player built structures from {} chunks", chunksToClear.size());
+		log.info("Rough pass, chunks to keep: {}, chunks to clear: {}", chunksToKeep.size(), chunksToClear.size());
 		
+		//Keep adding neighbouring zones with structures, for example, roads?
+		int pass = 0;
+		int lastSize;
+		do {
+			lastSize = chunksToKeep.size();
+			playerBuiltStructuresBySector.forEach((sector, structures) -> {
+				if(!chunksToClear.contains(sector)) {
+					return;
+				}
+				getNeighbouringSectors(sector, false).forEach(e -> {
+					if(chunksToKeep.contains(e)) {
+						chunksToKeep.add(sector);
+						chunksToClear.remove(sector);
+					}
+				});
+			});
+			if(chunksToKeep.size() > lastSize) {
+				log.info("Keep neighbours pass {}: Chunks to keep: {}, chunks to clear: {}", ++pass, chunksToKeep.size(), chunksToClear.size());
+			}
+		} while(chunksToKeep.size() > lastSize);
+		
+		//Keep ships
+		playerBuiltStructuresBySector.forEach((sector, structures) -> {
+			List<Zdo> shipPresent = structures.stream().filter(WorldProcessorUtils::isShip).collect(Collectors.toList());
+			if(shipPresent.size() > 0) {
+				chunksToKeep.add(sector);
+				chunksToClear.remove(sector);
+			}
+		});
+		
+		if(options.isVerbose()) {
+			log.info("Chunks to keep: {}", chunksToKeep);
+			log.info("Chunks to clear: {}", chunksToClear);
+		} else {
+			log.info("Ships pass: Chunks to keep: {}, chunks to clear: {}", chunksToKeep.size(), chunksToClear.size());
+		}
+		
+		Map<String, Integer> countByType = new HashMap<>();
 		valheimSaveArchive.setZdoList(valheimSaveArchive.getZdoList().stream()
 				.filter(zdo -> {
-					boolean keep = !WorldProcessorUtils.isPlayerBuilt(zdo) || !chunksToClear.contains(zdo.getSector());
+					boolean keep = chunksToKeep.contains(zdo.getSector()) || !WorldProcessorUtils.isPlayerBuilt(zdo);
 					if(!keep && options.isVerbose()) {
-						log.info("Cleaning {} in chunk {}",
+						countByType.compute(
 								Optional.ofNullable(ReverseHashcodeLookup.lookup(zdo.getPrefab()))
-										.orElse(Integer.toString(zdo.getPrefab())),
-								zdo.getSector()
-						);
+								.orElse(Integer.toString(zdo.getPrefab())), (k, v) -> v == null ? 1 : v + 1);
 					}
 					return keep;
 				})
 				.collect(Collectors.toList()));
+		if(options.isVerbose()) {
+			log.info("Cleaning {}", countByType);
+		}
 		
 		long zdosAfter = valheimSaveArchive.getZdoList().size();
 		
-		log.info("Cleared {} player built structures", zdosBefore - zdosAfter);
+		log.info("Cleared {} player built structures in {} chunks", zdosBefore - zdosAfter, chunksToClear.size());
 		
+	}
+	
+	private Set<Vector2i> getNeighbouringSectors(Vector2i sector, boolean includeThisOne) {
+		Set<Vector2i> neighbours = new HashSet<>();
+		for(int x = -1; x <= 1; x++) {
+			for(int y = -1; y <= 1; y++) {
+				if(x == 0 && y == 0 && !includeThisOne) {
+					continue;
+				}
+				neighbours.add(new Vector2i(sector.getX() + x, sector.getY() + y));
+			}
+		}
+		return neighbours;
 	}
 	
 	public static boolean countAsPlayerBuilt(Zdo zdo) {
