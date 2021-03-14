@@ -1,8 +1,16 @@
 package net.kakoen.valheim.save.decode;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class StableHashCode {
 	
+	private static final Map<String, Integer> STABLE_HASHCODE_CACHE = new HashMap<>();
+	
 	public static int getStableHashCode(String str) {
+		if(STABLE_HASHCODE_CACHE.containsKey(str)) {
+			return STABLE_HASHCODE_CACHE.get(str);
+		}
 		int num1 = 5381;
 		int num2 = num1;
 		for(int index = 0; index < str.length() && str.charAt(index) != 0; index += 2) {
@@ -13,6 +21,8 @@ public class StableHashCode {
 				break;
 			}
 		}
-		return num1 + num2 * 1566083941;
+		int result = num1 + num2 * 1566083941;
+		STABLE_HASHCODE_CACHE.put(str, result);
+		return result;
 	}
 }
