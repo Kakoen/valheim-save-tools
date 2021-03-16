@@ -32,7 +32,8 @@ public class CleanStructuresProcessor implements ValheimArchiveProcessor {
 			StableHashCode.getStableHashCode("digg"),
 			StableHashCode.getStableHashCode("paved_road"),
 			StableHashCode.getStableHashCode("mud_road"),
-			StableHashCode.getStableHashCode("path")
+			StableHashCode.getStableHashCode("path"),
+			StableHashCode.getStableHashCode("replant") //player built foliage?
 	);
 	
 	/**
