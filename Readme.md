@@ -119,7 +119,7 @@ installed for that.
 
 ## Using the library in your Java project
 
-From version 1.0.4, the library is published as a Maven package to Github packages. See https://github.com/Kakoen?tab=packages&repo_name=valheim-save-tools
+From version 1.1.0, the library is published as a Maven package to Github packages. See https://github.com/Kakoen?tab=packages&repo_name=valheim-save-tools
 
 ### Gradle
 
@@ -158,6 +158,6 @@ And then add the following dependency:
 <dependency>
   <groupId>net.kakoen.valheim</groupId>
   <artifactId>valheim-save-tools-lib</artifactId>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.1.0</version>
 </dependency>
 ```
