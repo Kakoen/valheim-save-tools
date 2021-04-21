@@ -164,14 +164,23 @@ public class ZPackage implements AutoCloseable {
 		} finally {
 			if(getPosition() != position + count) {
 				log.warn("Object at {} with size {} was not fully read, {} bytes remain", position, count, (position + count) - getPosition());
-				log.warn("At " + new Throwable().getStackTrace()[1]);
+				log.warn("At " + getFirstStackTraceElementOutsideClass(new Throwable().getStackTrace()));
 			}
 			if(getPosition() > position + count) {
 				log.warn("Fixed size object at {} was read past expected size {}, {} extra bytes were read", position, count, getPosition() - position - count);
-				log.warn("At " + new Throwable().getStackTrace()[1]);
+				log.warn("At " + getFirstStackTraceElementOutsideClass(new Throwable().getStackTrace()));
 			}
 			setPosition((int) (position + count));
 		}
+	}
+	
+	private StackTraceElement getFirstStackTraceElementOutsideClass(StackTraceElement[] stackTrace) {
+		for(int i = 0; i < stackTrace.length; i++) {
+			if(!stackTrace[i].getClassName().equals(ZPackage.class.getCanonicalName())) {
+				return stackTrace[i];
+			}
+		}
+		return stackTrace[0];
 	}
 	
 	public <R> R readLengthPrefixedObject(ZPackageReaderFunction<ZPackage, R> reader) throws ValheimArchiveUnsupportedVersionException {
