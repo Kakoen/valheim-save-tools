@@ -16,18 +16,18 @@ public class ValheimSaveMetadataTest {
 	
 	@Test
 	public void valheimSaveMetadata_shouldCorrectlyLoadMetadata() throws IOException, ValheimArchiveUnsupportedVersionException {
-		File inFile = new File("src/test/resources/DM20022026.fwl");
+		File inFile = new File("src/test/resources/Test20210421.fwl");
 		ValheimSaveMetadata metadata = new ValheimSaveMetadata(inFile, new ValheimArchiveReaderHints());
-		Assertions.assertEquals(26, metadata.getWorldVersion());
+		Assertions.assertEquals(27, metadata.getWorldVersion());
 		Assertions.assertEquals(1, metadata.getWorldGenVersion());
-		Assertions.assertEquals("DM20022026", metadata.getName());
-		Assertions.assertEquals("wMW3mSL2S0", metadata.getSeedName());
-		Assertions.assertEquals(1707192617, metadata.getSeed());
+		Assertions.assertEquals("Test20210421", metadata.getName());
+		Assertions.assertEquals("xbDKqu4XSu", metadata.getSeedName());
+		Assertions.assertEquals(-931666925, metadata.getSeed());
 	}
 	
 	@Test
 	public void valheimSaveMetadata_shouldCorrectlySaveMetadata() throws IOException, ValheimArchiveUnsupportedVersionException {
-		File inFile = new File("src/test/resources/DM20022026.fwl");
+		File inFile = new File("src/test/resources/Test20210421.fwl");
 		ValheimSaveMetadata metadata = new ValheimSaveMetadata(inFile, new ValheimArchiveReaderHints());
 		File outFile = File.createTempFile("out", ".fwl");
 		metadata.save(outFile);
