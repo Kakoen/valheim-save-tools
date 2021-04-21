@@ -59,6 +59,9 @@ public class Zdo {
 	private Map<Integer, String> strings;
 	private Map<String, String> stringsByName;
 	
+	private Map<Integer, byte[]> byteArrays;
+	private Map<String, byte[]> byteArraysByName;
+	
 	
 	public Zdo(ZdoId zdoId) {
 		this.uid = zdoId;
@@ -153,6 +156,19 @@ public class Zdo {
 				}
 			}
 			
+			if(worldVersion >= 27) {
+				
+				int byteArrayCount = reader.readChar();
+				if (byteArrayCount > 0) {
+					byteArrays = new LinkedHashMap<>();
+					byteArraysByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
+					for (int i = 0; i < byteArrayCount; i++) {
+						readValue(reader, ZPackage::readLengthPrefixedByteArray, byteArraysByName, byteArrays, hints.isResolveNames());
+					}
+				}
+				
+			}
+			
 			return Zdo.this;
 		});
 	}
@@ -190,6 +206,7 @@ public class Zdo {
 			writeProperties(writer, ints, intsByName, writer::writeInt32);
 			writeProperties(writer, longs, longsByName, writer::writeLong);
 			writeProperties(writer, strings, stringsByName, writer::writeString);
+			writeProperties(writer, byteArrays, byteArraysByName, writer::writeLengthPrefixedByteArray);
 		});
 	}
 	
