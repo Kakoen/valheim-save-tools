@@ -137,7 +137,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'net.kakoen.valheim', name: 'valheim-save-tools-lib', version: '1.0.4-SNAPSHOT'
+    implementation group: 'net.kakoen.valheim', name: 'valheim-save-tools-lib', version: '1.1.0'
 }
 ```
 
