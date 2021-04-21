@@ -919,3 +919,5 @@ Carrot
 LinenThread
 MeadBaseFrostResist
 ArmorLeatherChest
+_TerrainCompiler
+TCData
