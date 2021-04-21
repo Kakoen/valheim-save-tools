@@ -93,7 +93,7 @@ This will attempt to reset the generation state of all chunks and locations, exc
 
 ## Flags
 
-### --failOnSupportedVersion
+### --failOnUnsupportedVersion
 The program will exit with code 1 when a version is detected that is higher than 
 the last known supported version. When you automated processing of save files, for
 example on an auto-updated server, this might come in handy in order to not lose
