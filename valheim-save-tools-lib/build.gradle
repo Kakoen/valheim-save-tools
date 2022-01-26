@@ -22,7 +22,7 @@ dependencies {
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
 
-    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3'
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.1'
 
     testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
