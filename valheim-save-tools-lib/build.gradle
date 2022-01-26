@@ -19,8 +19,8 @@ repositories {
 dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.35'
 
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
 
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3'
 
