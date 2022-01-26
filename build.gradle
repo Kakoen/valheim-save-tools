@@ -19,7 +19,7 @@ java {
 dependencies {
     implementation project(':valheim-save-tools-lib')
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.35'
-    implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
+    implementation group: 'commons-cli', name: 'commons-cli', version: '1.5.0'
 
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
