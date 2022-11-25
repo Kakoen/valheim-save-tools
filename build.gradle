@@ -12,7 +12,7 @@ repositories {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -27,7 +27,7 @@ dependencies {
     testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 

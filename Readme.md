@@ -17,7 +17,7 @@ There are three ways to get the CLI Tool:
 * Download a [snapshot build](https://github.com/Kakoen/valheim-save-tools/actions/workflows/build.yml) (click on a commit and find the artifact in the bottom)
 * Build the project yourself (see further down)
 
-When you've got your flavour of `valheim-save-tools.jar`, make sure you have Java 11 installed, and use it as follows:
+When you've got your flavour of `valheim-save-tools.jar`, make sure you have Java 17 installed, and use it as follows:
 
 ```
 usage: java -jar valheim-save-tools.jar <infile> [outfile] [--addGlobalKey
