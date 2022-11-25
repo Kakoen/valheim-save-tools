@@ -26,7 +26,7 @@ import net.kakoen.valheim.save.parser.ZPackage;
 @Slf4j
 public class ValheimSaveArchive implements ValheimArchive {
 
-	public static final int MAX_SUPPORTED_WORLD_VERSION = 27;
+	public static final int MAX_SUPPORTED_WORLD_VERSION = 28;
 	
 	private Meta meta;
 	private long modified;
