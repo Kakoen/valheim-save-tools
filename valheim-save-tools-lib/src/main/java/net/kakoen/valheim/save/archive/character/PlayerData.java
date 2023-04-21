@@ -22,14 +22,15 @@ import net.kakoen.valheim.save.struct.ZdoId;
 @AllArgsConstructor
 @Slf4j
 public class PlayerData {
-	
-	private static final int MAX_SUPPORTED_PLAYERDATA_VERSION = 24;
+
+	private static final int MAX_SUPPORTED_PLAYERDATA_VERSION = 26;
 	private static final int MAX_SUPPORTED_SKILLS_VERSION = 2;
-	
+
 	private int version;
 	private float maxHealth;
 	private float health;
 	private float stamina;
+	private float stamina2;
 	private boolean firstSpawn;
 	private float timeSinceDeath;
 	private String guardianPower;
@@ -50,10 +51,13 @@ public class PlayerData {
 	private Vector3 hairColor;
 	private int modelIndex;
 	private List<Food> foods;
-	
+
 	private int skillsVersion;
 	private Map<Integer, Skill> skills;
-	
+	private Map<String, String> customData;
+	private float maxEitr;
+	private float eitr;
+
 	public PlayerData(ZPackage zPackage, ValheimArchiveReaderHints hints) throws ValheimArchiveUnsupportedVersionException {
 		version = zPackage.readInt32();
 		if(version > MAX_SUPPORTED_PLAYERDATA_VERSION) {
@@ -85,21 +89,20 @@ public class PlayerData {
 			this.zdoId = new ZdoId(zPackage);
 		}
 		this.inventory = new Inventory(zPackage, hints);
-		
+
 		knownRecipes = zPackage.readStringSet();
-		
-		// Known stations
+
 		int knownStationsCount = zPackage.readInt32();
 		knownStations = new LinkedHashMap<>();
 		for(int i = 0; i < knownStationsCount; i++) {
 			knownStations.put(zPackage.readString(), zPackage.readInt32());
 		}
-		
+
 		knownMaterials = zPackage.readStringSet();
 		shownTutorials = zPackage.readStringSet();
 		uniques = zPackage.readStringSet();
 		trophies = zPackage.readStringSet();
-		
+
 		// Known biomes
 		int knownBiomesCount = zPackage.readInt32();
 		knownBiomes = new LinkedHashMap<>();
@@ -112,29 +115,37 @@ public class PlayerData {
 			}
 			knownBiomes.put(biomeId, biomeName);
 		}
-		
+
 		int knownTextsCount = zPackage.readInt32();
 		knownTexts = new LinkedHashMap<>();
 		for(int i = 0; i < knownTextsCount; i++) {
 			knownTexts.put(zPackage.readString(), zPackage.readString());
 		}
-		
+
 		beardItem = zPackage.readString();
 		hairItem = zPackage.readString();
 		skinColor = zPackage.readVector3();
 		hairColor = zPackage.readVector3();
 		modelIndex = zPackage.readInt32();
-		
+
 		int foodsCount = zPackage.readInt32();
 		foods = new ArrayList<>();
 		for(int i = 0; i < foodsCount; i++) {
 			foods.add(new Food(zPackage));
 		}
-		
+
 		readSkills(zPackage, hints);
-	
+
+		customData = version >= 26 ? zPackage.readMap() : new LinkedHashMap<>();
+
+		if (version >= 26) {
+			stamina2 = zPackage.readSingle();
+			maxEitr = zPackage.readSingle();
+			eitr = zPackage.readSingle();
+		}
+
 	}
-	
+
 	private void readSkills(ZPackage zPackage, ValheimArchiveReaderHints hints) throws ValheimArchiveUnsupportedVersionException {
 		skillsVersion = zPackage.readInt32();
 		if(skillsVersion > MAX_SUPPORTED_SKILLS_VERSION) {
@@ -143,14 +154,14 @@ public class PlayerData {
 			}
 			log.warn("Skills version is {}, last tested version is {}", version, MAX_SUPPORTED_SKILLS_VERSION);
 		}
-		
+
 		int skillCount = zPackage.readInt32();
 		skills = new LinkedHashMap<>();
 		for(int i = 0; i < skillCount; i++) {
 			skills.put(zPackage.readInt32(), new Skill(zPackage.readSingle(), zPackage.readSingle()));
 		}
 	}
-	
+
 	public void save(ZPackage writer) {
 		writer.writeInt32(MAX_SUPPORTED_PLAYERDATA_VERSION);
 		writer.writeSingle(maxHealth);
@@ -161,46 +172,50 @@ public class PlayerData {
 		writer.writeString(guardianPower);
 		writer.writeSingle(guardianPowerCooldown);
 		inventory.save(writer);
-		
+
 		writer.writeStringSet(knownRecipes);
-		
+
 		writer.writeInt32(knownStations.size());
 		knownStations.forEach((k, v) -> {
 			writer.writeString(k);
 			writer.writeInt32(v);
 		});
-		
+
 		writer.writeStringSet(knownMaterials);
 		writer.writeStringSet(shownTutorials);
 		writer.writeStringSet(uniques);
 		writer.writeStringSet(trophies);
-		
+
 		writer.writeInt32(knownBiomes.size());
 		knownBiomes.forEach((k, v) -> {
 			writer.writeInt32(k);
 		});
-		
+
 		writer.writeInt32(knownTexts.size());
 		knownTexts.forEach((k, v) -> {
 			writer.writeString(k);
 			writer.writeString(v);
 		});
-		
+
 		writer.writeString(beardItem);
 		writer.writeString(hairItem);
 		writer.writeVector3(skinColor);
 		writer.writeVector3(hairColor);
 		writer.writeInt32(modelIndex);
-		
+
 		writer.writeInt32(foods.size());
 		foods.forEach(food -> food.save(writer));
-		
+
 		writer.writeInt32(MAX_SUPPORTED_SKILLS_VERSION);
 		writer.writeInt32(skills.size());
 		skills.forEach((key, skill) -> {
 			writer.writeInt32(key);
 			skill.save(writer);
 		});
+		writer.writeMap(customData);
+		writer.writeSingle(stamina2);
+		writer.writeSingle(maxEitr);
+		writer.writeSingle(eitr);
 	}
 }
 

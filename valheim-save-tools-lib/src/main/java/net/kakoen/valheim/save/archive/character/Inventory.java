@@ -18,7 +18,7 @@ import net.kakoen.valheim.save.parser.ZPackage;
 @Slf4j
 public class Inventory {
 	
-	private static final int MAX_SUPPORTED_INVENTORY_VERSION = 103;
+	private static final int MAX_SUPPORTED_INVENTORY_VERSION = 104;
 	
 	private int version;
 	private List<InventoryItem> inventoryItems;

@@ -23,7 +23,7 @@ import net.kakoen.valheim.save.parser.ZPackage;
 @Slf4j
 public class ValheimCharacter implements ValheimArchive {
 	
-	private static final int MAX_SUPPORTED_CHARACTER_VERSION = 33;
+	private static final int MAX_SUPPORTED_CHARACTER_VERSION = 37;
 	
 	private int version;
 	private int kills;

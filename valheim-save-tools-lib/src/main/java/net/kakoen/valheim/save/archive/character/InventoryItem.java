@@ -3,9 +3,11 @@ package net.kakoen.valheim.save.archive.character;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import net.kakoen.valheim.save.parser.ZPackage;
 import net.kakoen.valheim.save.struct.Vector2i;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -21,7 +23,8 @@ public class InventoryItem {
 	private int variant;
 	private long crafterId;
 	private String crafterName;
-	
+	private Map<String, String> customData;
+
 	public InventoryItem(ZPackage zPackage, int version) {
 		name = zPackage.readString();
 		stack = zPackage.readInt32();
@@ -32,6 +35,7 @@ public class InventoryItem {
 		variant = version >= 102 ? zPackage.readInt32() : 0;
 		crafterId = version >= 103 ? zPackage.readLong() : 0;
 		crafterName = version >= 103 ? zPackage.readString() : "";
+		customData = version >= 104 ? zPackage.readMap() : new LinkedHashMap<>();
 	}
 	
 	public void save(ZPackage writer) {
@@ -44,5 +48,6 @@ public class InventoryItem {
 		writer.writeInt32(variant);
 		writer.writeLong(crafterId);
 		writer.writeString(crafterName);
+		writer.writeMap(customData);
 	}
 }

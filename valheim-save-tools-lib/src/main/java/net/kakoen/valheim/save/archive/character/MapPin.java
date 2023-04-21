@@ -18,12 +18,14 @@ public class MapPin {
 	private Vector3 position;
 	private PinType pinType;
 	private boolean checked;
+	private long ownerId;
 	
 	public MapPin(ZPackage zPackage, int mapVersion) {
 		name = zPackage.readString();
 		position = zPackage.readVector3();
 		pinType = new PinType(zPackage.readInt32());
 		checked = (mapVersion >= 3) && zPackage.readBool();
+		ownerId = mapVersion >= 6 ? zPackage.readLong() : 0L;
 	}
 	
 	public void save(ZPackage writer) {
@@ -31,5 +33,6 @@ public class MapPin {
 		writer.writeVector3(position);
 		writer.writeInt32(pinType.getId());
 		writer.writeBool(checked);
+		writer.writeLong(ownerId);
 	}
 }

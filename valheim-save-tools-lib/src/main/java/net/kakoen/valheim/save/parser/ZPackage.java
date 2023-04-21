@@ -1,20 +1,18 @@
 package net.kakoen.valheim.save.parser;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import net.kakoen.valheim.save.exception.ValheimArchiveUnsupportedVersionException;
@@ -42,6 +40,11 @@ public class ZPackage implements AutoCloseable {
 	
 	public ZPackage() {
 		buffer = ByteBuffer.allocate(INITIAL_CAPACITY);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
+	}
+
+	public ZPackage(byte[] contents) {
+		buffer = ByteBuffer.wrap(contents).asReadOnlyBuffer();
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 	}
 	
@@ -448,5 +451,46 @@ public class ZPackage implements AutoCloseable {
 			fileOutputStream.write(buffer.array(), 0, size);
 			log.info("Wrote {} bytes to {}", size, file.getAbsolutePath());
 		}
+	}
+
+	public void writeTo(OutputStream os) throws IOException {
+		int size = inFile != null ? buffer.capacity() : buffer.position();
+		os.write(buffer.array(), 0, size);
+	}
+
+	@SneakyThrows
+	public ZPackage readCompressedPackage() {
+		byte[] compressedPackageData = readLengthPrefixedByteArray();
+		return new ZPackage(new GZIPInputStream(new ByteArrayInputStream(compressedPackageData)).readAllBytes());
+    }
+
+	@SneakyThrows
+	public void writeCompressedPackage(Consumer<ZPackage> packageBuilder) {
+		ZPackage newPackage = new ZPackage();
+		packageBuilder.accept(newPackage);
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try(GZIPOutputStream gzos = new GZIPOutputStream(baos)) {
+			newPackage.writeTo(gzos);
+		}
+		baos.close();
+		writeLengthPrefixedByteArray(baos.toByteArray());
+	}
+
+	public Map<String, String> readMap() {
+		int count = readInt32();
+		Map<String, String> result = new LinkedHashMap<>();
+		for (int i = 0; i < count; i++) {
+			result.put(readString(), readString());
+		}
+		return result;
+	}
+
+	public void writeMap(Map<String, String> map) {
+		writeInt32(map.size());
+		map.entrySet().forEach(entry -> {
+			writeString(entry.getKey());
+			writeString(entry.getValue());
+		});
 	}
 }
