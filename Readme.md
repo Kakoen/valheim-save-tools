@@ -45,6 +45,14 @@ usage: java -jar valheim-save-tools.jar <infile> [outfile] [--addGlobalKey
 <outfile>: Output file of type .fch, .db, .fwl or .json (optional)
 ```
 
+## Example usage
+
+Decode a save file to a json file:
+`java -jar valheim-save-tools.jar mysave.db mysave.json`
+
+Encode a json file to a save file:
+`java -jar valheim-save-tools.jar mysave.json mysave.db`
+
 ## Processors
 
 A handful of built-in processors are included. They are executed in the order they are
