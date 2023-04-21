@@ -44,5 +44,5 @@ jar {
 
 shadowJar {
     from 'simplelogger.properties'
-    archiveName("${project.name}.jar")
+    archiveFileName.set("${project.name}.jar")
 }
