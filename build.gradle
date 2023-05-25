@@ -21,11 +21,11 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.6'
     implementation group: 'commons-cli', name: 'commons-cli', version: '1.5.0'
 
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
 
-    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'

@@ -19,13 +19,13 @@ repositories {
 dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.6'
 
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
 
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.2'
 
-    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
     testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.6'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
