@@ -16,6 +16,7 @@ import net.kakoen.valheim.save.archive.save.PrefabLocation;
 import net.kakoen.valheim.save.archive.save.Zdo;
 import net.kakoen.valheim.save.archive.save.Zones;
 import net.kakoen.valheim.save.struct.Vector2i;
+import net.kakoen.valheim.save.struct.Vector2s;
 import net.kakoen.valheim.save.struct.ZdoId;
 
 @Slf4j
@@ -37,7 +38,7 @@ public class ResetWorldProcessor implements ValheimArchiveProcessor {
 		
 		log.info("Resetting world...");
 		
-		Set<Vector2i> keepSectors = new HashSet<>();
+		Set<Vector2s> keepSectors = new HashSet<>();
 		keepSectors.addAll(getSectorsWithPlayerBuiltStructures(archive.getZdoList()));
 		keepSectors.addAll(getSectorsWithBossStones(archive.getZdoList()));
 		
@@ -64,25 +65,25 @@ public class ResetWorldProcessor implements ValheimArchiveProcessor {
 		int locationsAfter = (int)(zones.getPrefabLocations().stream().filter(PrefabLocation::isGenerated).count());
 		log.info("Removed {} generated locations (before {}, after {})", (locationsBefore - locationsAfter), locationsBefore, locationsAfter);
 		
-		int deadZdosBefore = archive.getDeadZdos().size();
-		Set<Long> zdoIds = archive.getZdoList().stream().map(Zdo::getUid).map(ZdoId::getId).collect(Collectors.toSet());
-		archive.setDeadZdos(archive.getDeadZdos().stream()
-				.filter(deadZdo -> zdoIds.contains(deadZdo.getUid().getId()))
-				.collect(Collectors.toList()));
-		int deadZdosAfter = archive.getDeadZdos().size();
-		log.info("Removed {} dead zdos (before {}, after {})", (deadZdosBefore - deadZdosAfter), deadZdosBefore, deadZdosAfter);
+//		int deadZdosBefore = archive.getDeadZdos().size();
+//		Set<Long> zdoIds = archive.getZdoList().stream().map(Zdo::getUid).map(ZdoId::getId).collect(Collectors.toSet());
+//		archive.setDeadZdos(archive.getDeadZdos().stream()
+//				.filter(deadZdo -> zdoIds.contains(deadZdo.getUid().getId()))
+//				.collect(Collectors.toList()));
+//		int deadZdosAfter = archive.getDeadZdos().size();
+//		log.info("Removed {} dead zdos (before {}, after {})", (deadZdosBefore - deadZdosAfter), deadZdosBefore, deadZdosAfter);
 	}
 	
-	private Collection<? extends Vector2i> getSectorsWithBossStones(List<Zdo> zdoList) {
-		Set<Vector2i> sectorsWithBossStones = new HashSet<>();
+	private Collection<? extends Vector2s> getSectorsWithBossStones(List<Zdo> zdoList) {
+		Set<Vector2s> sectorsWithBossStones = new HashSet<>();
 		zdoList.stream()
 				.filter(WorldProcessorUtils::isBossStone)
 				.forEach(zdo -> sectorsWithBossStones.add(zdo.getSector()));
 		return sectorsWithBossStones;
 	}
 	
-	private Collection<Vector2i> getSectorsWithPlayerBuiltStructures(List<Zdo> zdoList) {
-		Set<Vector2i> sectorsWithPlayerBuiltStructures = new HashSet<>();
+	private Collection<Vector2s> getSectorsWithPlayerBuiltStructures(List<Zdo> zdoList) {
+		Set<Vector2s> sectorsWithPlayerBuiltStructures = new HashSet<>();
 		List<Zdo> playerBuiltStructures = zdoList.stream()
 				.filter(WorldProcessorUtils::isPlayerBuilt)
 				.peek(zdo -> {

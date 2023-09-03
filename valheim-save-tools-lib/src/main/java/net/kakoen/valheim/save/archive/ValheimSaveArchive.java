@@ -26,7 +26,7 @@ import net.kakoen.valheim.save.parser.ZPackage;
 @Slf4j
 public class ValheimSaveArchive implements ValheimArchive {
 
-	public static final int MAX_SUPPORTED_WORLD_VERSION = 29;
+	public static final int MAX_SUPPORTED_WORLD_VERSION = 32;
 	
 	private Meta meta;
 	private long modified;
@@ -38,8 +38,7 @@ public class ValheimSaveArchive implements ValheimArchive {
 	private RandomEvent randomEvent;
 	
 	private List<Zdo> zdoList = new ArrayList<>();
-	private List<DeadZdo> deadZdos = new ArrayList<>();
-	
+
 	public ValheimSaveArchive(File file, ValheimSaveReaderHints hints) throws IOException, ValheimArchiveUnsupportedVersionException {
 		meta = new Meta();
 		modified = file.lastModified();
@@ -51,6 +50,8 @@ public class ValheimSaveArchive implements ValheimArchive {
 					throw new ValheimArchiveUnsupportedVersionException(ValheimSaveArchive.class, "world", meta.getWorldVersion(), MAX_SUPPORTED_WORLD_VERSION);
 				}
 				log.warn("WARNING: world version is {}, the maximum tested world version is {}", meta.getWorldVersion(), MAX_SUPPORTED_WORLD_VERSION);
+			} else {
+				log.info("World version: {}", meta.getWorldVersion());
 			}
 			meta.setNetTime(zPackage.readDouble());
 			
@@ -84,10 +85,7 @@ public class ValheimSaveArchive implements ValheimArchive {
 		
 		writer.writeInt32(zdoList.size());
 		zdoList.forEach(zdo -> zdo.save(writer));
-		
-		writer.writeInt32(deadZdos.size());
-		deadZdos.forEach(deadZdo -> deadZdo.save(writer));
-		
+
 		zones.save(writer);
 		
 		randomEvent.save(writer);
@@ -98,15 +96,10 @@ public class ValheimSaveArchive implements ValheimArchive {
 		nextUid = reader.readUInt();
 		int numberOfZdos = reader.readInt32();
 		for(int i = 0; i < numberOfZdos; i++) {
-			zdoList.add(new Zdo(reader, version, hints));
+			Zdo zdo = new Zdo(reader, version, hints);
+			zdoList.add(zdo);
 		}
 		log.info("Loaded {} zdos", zdoList.size());
-		
-		int deadZdoCount = reader.readInt32();
-		for(int i = 0; i < deadZdoCount; i++) {
-			deadZdos.add(new DeadZdo(reader));
-		}
-		log.info("Loaded {} dead zdos", deadZdos.size());
 	}
 	
 }

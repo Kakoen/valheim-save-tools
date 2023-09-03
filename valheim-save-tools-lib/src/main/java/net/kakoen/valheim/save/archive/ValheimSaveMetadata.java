@@ -2,6 +2,8 @@ package net.kakoen.valheim.save.archive;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +28,9 @@ public class ValheimSaveMetadata implements ValheimArchive {
 	private String seedName;
 	private int seed;
 	private long uid;
+	private boolean needsDB;
 	private int worldGenVersion;
+	private Set<String> startingGlobalKeys = new LinkedHashSet<>();
 	
 	public ValheimSaveMetadata(File file, ValheimArchiveReaderHints hints) throws IOException, ValheimArchiveUnsupportedVersionException {
 		try(ZPackage zPackage = new ZPackage(file)) {
@@ -43,6 +47,9 @@ public class ValheimSaveMetadata implements ValheimArchive {
 				seed = reader.readInt32();
 				uid = reader.readLong();
 				worldGenVersion = reader.readInt32();
+				needsDB = worldVersion >= 30 && reader.readBool();
+				startingGlobalKeys = reader.readStringSet();
+
 				return ValheimSaveMetadata.this;
 			});
 		}
@@ -58,6 +65,8 @@ public class ValheimSaveMetadata implements ValheimArchive {
 				writer.writeInt32(seed);
 				writer.writeLong(uid);
 				writer.writeInt32(worldGenVersion);
+				writer.writeBool(needsDB);
+				writer.writeStringSet(startingGlobalKeys);
 			});
 			zPackage.writeTo(file);
 		}

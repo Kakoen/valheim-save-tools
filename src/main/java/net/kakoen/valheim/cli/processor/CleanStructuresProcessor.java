@@ -18,6 +18,7 @@ import net.kakoen.valheim.save.archive.save.Zdo;
 import net.kakoen.valheim.save.decode.ReverseHashcodeLookup;
 import net.kakoen.valheim.save.decode.StableHashCode;
 import net.kakoen.valheim.save.struct.Vector2i;
+import net.kakoen.valheim.save.struct.Vector2s;
 
 @Slf4j
 public class CleanStructuresProcessor implements ValheimArchiveProcessor {
@@ -59,7 +60,7 @@ public class CleanStructuresProcessor implements ValheimArchiveProcessor {
 		
 		long zdosBefore = valheimSaveArchive.getZdoList().size();
 		
-		Map<Vector2i, Set<Zdo>> playerBuiltStructuresBySector = new HashMap<>();
+		Map<Vector2s, Set<Zdo>> playerBuiltStructuresBySector = new HashMap<>();
 		valheimSaveArchive.getZdoList().stream()
 				.filter(WorldProcessorUtils::isPlayerBuilt)
 				.forEach(zdo -> playerBuiltStructuresBySector.compute(zdo.getSector(), (k, v) -> {
@@ -68,7 +69,7 @@ public class CleanStructuresProcessor implements ValheimArchiveProcessor {
 					return v;
 				}));
 		
-		Map<Vector2i, Set<Zdo>> playerBuiltStructuresCountedBySector = new HashMap<>();
+		Map<Vector2s, Set<Zdo>> playerBuiltStructuresCountedBySector = new HashMap<>();
 		playerBuiltStructuresBySector.forEach((sector, structures) -> {
 			playerBuiltStructuresCountedBySector.put(sector,
 					structures.stream()
@@ -78,8 +79,8 @@ public class CleanStructuresProcessor implements ValheimArchiveProcessor {
 		
 		log.info("{} chunks with player built structures found", playerBuiltStructuresBySector.size());
 		
-		Set<Vector2i> chunksToKeep = new HashSet<>();
-		Set<Vector2i> chunksToClear = new HashSet<>();
+		Set<Vector2s> chunksToKeep = new HashSet<>();
+		Set<Vector2s> chunksToClear = new HashSet<>();
 		
 		playerBuiltStructuresBySector.forEach((sector, structures) -> {
 			int count = playerBuiltStructuresCountedBySector.get(sector).size();
@@ -161,14 +162,14 @@ public class CleanStructuresProcessor implements ValheimArchiveProcessor {
 		
 	}
 	
-	private Set<Vector2i> getNeighbouringSectors(Vector2i sector, boolean includeThisOne) {
-		Set<Vector2i> neighbours = new HashSet<>();
-		for(int x = -1; x <= 1; x++) {
-			for(int y = -1; y <= 1; y++) {
+	private Set<Vector2s> getNeighbouringSectors(Vector2s sector, boolean includeThisOne) {
+		Set<Vector2s> neighbours = new HashSet<>();
+		for(short x = -1; x <= 1; x++) {
+			for(short y = -1; y <= 1; y++) {
 				if(x == 0 && y == 0 && !includeThisOne) {
 					continue;
 				}
-				neighbours.add(new Vector2i(sector.getX() + x, sector.getY() + y));
+				neighbours.add(new Vector2s((short)(sector.getX() + x), (short)(sector.getY() + y)));
 			}
 		}
 		return neighbours;

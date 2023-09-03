@@ -2,6 +2,7 @@ package net.kakoen.valheim.save.archive;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,18 +17,19 @@ public class ValheimSaveMetadataTest {
 	
 	@Test
 	public void valheimSaveMetadata_shouldCorrectlyLoadMetadata() throws IOException, ValheimArchiveUnsupportedVersionException {
-		File inFile = new File("src/test/resources/Test.fwl");
+		File inFile = new File("src/test/resources/TestWorldKakoen.fwl");
 		ValheimSaveMetadata metadata = new ValheimSaveMetadata(inFile, new ValheimArchiveReaderHints());
-		Assertions.assertEquals(29, metadata.getWorldVersion());
+		Assertions.assertEquals(32, metadata.getWorldVersion());
 		Assertions.assertEquals(2, metadata.getWorldGenVersion());
-		Assertions.assertEquals("Test", metadata.getName());
-		Assertions.assertEquals("fGSaPHCYaR", metadata.getSeedName());
-		Assertions.assertEquals(555290274, metadata.getSeed());
+		Assertions.assertEquals("TestWorldKakoen", metadata.getName());
+		Assertions.assertEquals("q6GhJN6FwT", metadata.getSeedName());
+		Assertions.assertEquals(517038747, metadata.getSeed());
+		Assertions.assertEquals(Set.of(), metadata.getStartingGlobalKeys());
 	}
 	
 	@Test
 	public void valheimSaveMetadata_shouldCorrectlySaveMetadata() throws IOException, ValheimArchiveUnsupportedVersionException {
-		File inFile = new File("src/test/resources/Test.fwl");
+		File inFile = new File("src/test/resources/TestWorldKakoen.fwl");
 		ValheimSaveMetadata metadata = new ValheimSaveMetadata(inFile, new ValheimArchiveReaderHints());
 		File outFile = File.createTempFile("out", ".fwl");
 		metadata.save(outFile);

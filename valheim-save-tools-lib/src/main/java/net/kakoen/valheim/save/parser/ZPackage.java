@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.kakoen.valheim.save.exception.ValheimArchiveUnsupportedVersionException;
 import net.kakoen.valheim.save.struct.Quaternion;
 import net.kakoen.valheim.save.struct.Vector2i;
+import net.kakoen.valheim.save.struct.Vector2s;
 import net.kakoen.valheim.save.struct.Vector3;
 
 @Slf4j
@@ -82,9 +83,9 @@ public class ZPackage implements AutoCloseable {
 		return buffer.getShort();
 	}
 	
-	public void writeShort(float value) {
-		ensureWritableSpace(4);
-		buffer.putFloat(value);
+	public void writeShort(short value) {
+		ensureWritableSpace(2);
+		buffer.putShort(value);
 	}
 	
 	public double readDouble() {
@@ -106,12 +107,9 @@ public class ZPackage implements AutoCloseable {
 	}
 	
 	public long readUInt() {
-		int value = buffer.getInt();
-		if(value < 0) {
-			return (value & 0x7FFFFFFF) + 0x80000000L;
-		} else {
-			return value;
-		}
+		// Similar to readUShort, we now read an int and convert it to a long
+		// This is because Java does not have an unsigned int type
+		return Integer.toUnsignedLong(buffer.getInt());
 	}
 	
 	public void writeUInt(long value) {
@@ -244,6 +242,15 @@ public class ZPackage implements AutoCloseable {
 			toWrite = (byte)(toWrite - 0x80);
 		}
 		writeByte(toWrite);
+	}
+
+	public Vector2s readVector2s() {
+		return new Vector2s(readShort(), readShort());
+	}
+
+	public void writeVector2s(Vector2s value) {
+		writeShort(value.getX());
+		writeShort(value.getY());
 	}
 	
 	public Vector2i readVector2i() {
@@ -492,5 +499,17 @@ public class ZPackage implements AutoCloseable {
 			writeString(entry.getKey());
 			writeString(entry.getValue());
 		});
+	}
+
+    public int readUShort() {
+		return Short.toUnsignedInt(readShort());
+    }
+
+	public void writeUShort(int value) {
+		short toWrite = (short)(value & 0x7FFF);
+		if(value > 0x7FFF) {
+			toWrite = (short)(toWrite - 0x8000);
+		}
+		writeShort(toWrite);
 	}
 }

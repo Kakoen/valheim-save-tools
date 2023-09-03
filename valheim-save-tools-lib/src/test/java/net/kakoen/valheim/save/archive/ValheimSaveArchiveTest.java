@@ -16,13 +16,13 @@ public class ValheimSaveArchiveTest {
 	
 	@Test
 	public void valheimSaveArchive_shouldCorrectlyLoadSave() throws IOException, ValheimArchiveUnsupportedVersionException {
-		ValheimSaveArchive valheimSaveArchive = new ValheimSaveArchive(new File("src/test/resources/Test.db"), ValheimSaveReaderHints.builder().build());
-		Assertions.assertEquals(29, valheimSaveArchive.getMeta().getWorldVersion());
+		ValheimSaveArchive valheimSaveArchive = new ValheimSaveArchive(new File("src/test/resources/TestWorldKakoen.db"), ValheimSaveReaderHints.builder().build());
+		Assertions.assertEquals(32, valheimSaveArchive.getMeta().getWorldVersion());
 	}
 	
 	@Test
 	public void valheimSaveArchive_shouldCorrectlySave() throws IOException, ValheimArchiveUnsupportedVersionException {
-		File inFile = new File("src/test/resources/Test.db");
+		File inFile = new File("src/test/resources/TestWorldKakoen.db");
 		ValheimSaveArchive valheimSaveArchive = new ValheimSaveArchive(inFile, ValheimSaveReaderHints.builder().build());
 		File outFile = File.createTempFile("out", ".db");
 		valheimSaveArchive.save(outFile);
