@@ -31,7 +31,7 @@ jobs:
         name: valheim-save-tools.jar
         path: ./build/libs/valheim-save-tools.jar
     - name: Publish SNAPSHOT Maven package
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/main'
       run: ./gradlew publish -PonlyPublishSnapshotVersion
       env:
         GITHUB_PACKAGES_WRITE_TOKEN: ${{ secrets.PACKAGES_WRITE_TOKEN }}
