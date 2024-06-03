@@ -74,7 +74,7 @@ public class Zdo {
     private static final int FLAG_WRITE_ROTATION = 4096;
 
     /**
-     * @param zPackage     The package that's being read
+     * @param reader     The package that's being read
      * @param worldVersion The world version of the save
      * @param hints        Hints that affect processing the zdo
      * @return
@@ -108,7 +108,7 @@ public class Zdo {
         }
 
         if (flagSet(flags, FLAG_WRITE_FLOATS)) {
-            int floatCount = reader.readChar();
+            int floatCount = reader.readNumItems(worldVersion);
             if (floatCount > 0) {
                 floats = new LinkedHashMap<>();
                 floatsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
@@ -119,7 +119,7 @@ public class Zdo {
         }
 
         if (flagSet(flags, FLAG_WRITE_VECTOR3S)) {
-            int numVector3 = reader.readChar();
+            int numVector3 = reader.readNumItems(worldVersion);
             if (numVector3 > 0) {
                 vector3s = new LinkedHashMap<>();
                 vector3sByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
@@ -130,7 +130,7 @@ public class Zdo {
         }
 
         if (flagSet(flags, FLAG_WRITE_QUATS)) {
-            int quatCount = reader.readChar();
+            int quatCount = reader.readNumItems(worldVersion);
             if (quatCount > 0) {
                 quats = new LinkedHashMap<>();
                 quatsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
@@ -141,7 +141,7 @@ public class Zdo {
         }
 
         if (flagSet(flags, FLAG_WRITE_INTS)) {
-            int intCount = reader.readChar();
+            int intCount = reader.readNumItems(worldVersion);
             if (intCount > 0) {
                 ints = new LinkedHashMap<>();
                 intsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
@@ -152,7 +152,7 @@ public class Zdo {
         }
 
         if (flagSet(flags, FLAG_WRITE_LONGS)) {
-            int longCount = reader.readChar();
+            int longCount = reader.readNumItems(worldVersion);
             if (longCount > 0) {
                 longs = new LinkedHashMap<>();
                 longsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
@@ -163,7 +163,7 @@ public class Zdo {
         }
 
         if (flagSet(flags, FLAG_WRITE_STRINGS)) {
-            int stringCount = reader.readChar();
+            int stringCount = reader.readNumItems(worldVersion);
             if (stringCount > 0) {
                 strings = new LinkedHashMap<>();
                 stringsByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
@@ -174,7 +174,7 @@ public class Zdo {
         }
 
         if (flagSet(flags, FLAG_WRITE_BYTEARRAYS)) {
-            int byteArrayCount = reader.readChar();
+            int byteArrayCount = reader.readNumItems(worldVersion);
             if (byteArrayCount > 0) {
                 byteArrays = new LinkedHashMap<>();
                 byteArraysByName = hints.isResolveNames() ? new LinkedHashMap<>() : null;
@@ -261,7 +261,7 @@ public class Zdo {
         int size = ((valuesByHash != null) ? valuesByHash.size() : 0)
                 + ((valuesByName != null) ? valuesByName.size() : 0);
 
-        writer.writeChar(size);
+        writer.writeNumItems(size);
         if (valuesByHash != null) {
             valuesByHash.forEach((k, v) -> {
                 writer.writeInt32(k);

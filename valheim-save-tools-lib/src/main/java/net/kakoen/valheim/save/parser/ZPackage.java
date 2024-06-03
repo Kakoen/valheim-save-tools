@@ -512,4 +512,24 @@ public class ZPackage implements AutoCloseable {
 		}
 		writeShort(toWrite);
 	}
+
+	public int readNumItems(int worldVersion) {
+		if (worldVersion < 33) {
+			return readChar();
+		}
+		int num = readByte();
+		if ((num & 128) != 0) {
+			num = ((num & 127) << 8) | readByte();
+		}
+		return num;
+	}
+
+	public void writeNumItems(int numItems) {
+		if (numItems < 128) {
+			writeByte((byte) numItems);
+		} else {
+			writeByte((byte) ((numItems >> 8) | 128));
+			writeByte((byte) (numItems & 255));
+		}
+	}
 }

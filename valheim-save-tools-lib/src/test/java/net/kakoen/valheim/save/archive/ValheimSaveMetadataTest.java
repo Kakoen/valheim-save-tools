@@ -14,10 +14,10 @@ import net.kakoen.valheim.save.exception.ValheimArchiveUnsupportedVersionExcepti
 
 @Slf4j
 public class ValheimSaveMetadataTest {
-	
+
 	@Test
-	public void valheimSaveMetadata_shouldCorrectlyLoadMetadata() throws IOException, ValheimArchiveUnsupportedVersionException {
-		File inFile = new File("src/test/resources/TestWorldKakoen.fwl");
+	public void valheimSaveMetadata_shouldCorrectlyLoadMetadata_forVersion32() throws IOException, ValheimArchiveUnsupportedVersionException {
+		File inFile = new File("src/test/resources/TestWorld32.fwl");
 		ValheimSaveMetadata metadata = new ValheimSaveMetadata(inFile, new ValheimArchiveReaderHints());
 		Assertions.assertEquals(32, metadata.getWorldVersion());
 		Assertions.assertEquals(2, metadata.getWorldGenVersion());
@@ -26,10 +26,22 @@ public class ValheimSaveMetadataTest {
 		Assertions.assertEquals(517038747, metadata.getSeed());
 		Assertions.assertEquals(Set.of(), metadata.getStartingGlobalKeys());
 	}
+
+	@Test
+	public void valheimSaveMetadata_shouldCorrectlyLoadMetadata_forVersion34() throws IOException, ValheimArchiveUnsupportedVersionException {
+		File inFile = new File("src/test/resources/TestWorld34.fwl");
+		ValheimSaveMetadata metadata = new ValheimSaveMetadata(inFile, new ValheimArchiveReaderHints());
+		Assertions.assertEquals(34, metadata.getWorldVersion());
+		Assertions.assertEquals(2, metadata.getWorldGenVersion());
+		Assertions.assertEquals("Test", metadata.getName());
+		Assertions.assertEquals("Kh0zDpuPnw", metadata.getSeedName());
+		Assertions.assertEquals(810132289, metadata.getSeed());
+		Assertions.assertEquals(Set.of(), metadata.getStartingGlobalKeys());
+	}
 	
 	@Test
 	public void valheimSaveMetadata_shouldCorrectlySaveMetadata() throws IOException, ValheimArchiveUnsupportedVersionException {
-		File inFile = new File("src/test/resources/TestWorldKakoen.fwl");
+		File inFile = new File("src/test/resources/TestWorld34.fwl");
 		ValheimSaveMetadata metadata = new ValheimSaveMetadata(inFile, new ValheimArchiveReaderHints());
 		File outFile = File.createTempFile("out", ".fwl");
 		metadata.save(outFile);
