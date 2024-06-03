@@ -145,7 +145,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'net.kakoen.valheim', name: 'valheim-save-tools-lib', version: '1.1.2'
+    implementation group: 'net.kakoen.valheim', name: 'valheim-save-tools-lib', version: '1.1.3'
 }
 ```
 
@@ -166,6 +166,6 @@ And then add the following dependency:
 <dependency>
   <groupId>net.kakoen.valheim</groupId>
   <artifactId>valheim-save-tools-lib</artifactId>
-  <version>1.1.2</version>
+  <version>1.1.3</version>
 </dependency>
 ```
