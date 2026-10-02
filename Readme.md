@@ -8,7 +8,20 @@ This repository contains two projects.
 The following formats are supported:
 * World data files (.db)
 * World metadata files (.fwl)
-* Character files (.fch)
+* Character files (.fch), including Valheim 1.0 (character data version 46,
+  playerData version 33, inventory version 109, map version 8)
+
+Character file notes:
+* Character, playerData, inventory and map versions are preserved on save
+  instead of being rewritten to the highest supported version.
+* Items in inventory version >= 108 use the game's compact format, in which the
+  item identity is the stable hash of the prefab name; the tool resolves these
+  hashes to item names using its known-strings table.
+* Items carry a `cheated` flag (inventory version 109). Items obtained through
+  console commands are flagged by the game; the flag is exposed in the JSON and
+  preserved on save.
+* Unmodified character files survive a read-write round trip byte-identically;
+  the map data is re-emitted verbatim when its parsed content is unchanged.
 
 ## Running the Command Line Interface tool
 

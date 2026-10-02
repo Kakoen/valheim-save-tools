@@ -19,20 +19,29 @@ public class MapPin {
 	private PinType pinType;
 	private boolean checked;
 	private long ownerId;
-	
+	private String author;
+
 	public MapPin(ZPackage zPackage, int mapVersion) {
 		name = zPackage.readString();
 		position = zPackage.readVector3();
 		pinType = new PinType(zPackage.readInt32());
 		checked = (mapVersion >= 3) && zPackage.readBool();
 		ownerId = mapVersion >= 6 ? zPackage.readLong() : 0L;
+		author = mapVersion >= 8 ? zPackage.readString() : "";
 	}
-	
-	public void save(ZPackage writer) {
+
+	public void save(ZPackage writer, int mapVersion) {
 		writer.writeString(name);
 		writer.writeVector3(position);
 		writer.writeInt32(pinType.getId());
-		writer.writeBool(checked);
-		writer.writeLong(ownerId);
+		if (mapVersion >= 3) {
+			writer.writeBool(checked);
+		}
+		if (mapVersion >= 6) {
+			writer.writeLong(ownerId);
+		}
+		if (mapVersion >= 8) {
+			writer.writeString(author != null ? author : "");
+		}
 	}
 }
