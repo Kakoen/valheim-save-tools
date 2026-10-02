@@ -36,7 +36,9 @@ public class WorldPlayerData {
 		}
 		homePoint = zPackage.readVector3();
 		if(version >= 29 && zPackage.readBool()) {
-			mapData = zPackage.readLengthPrefixedObject(reader -> new MinimapData(reader, hints));
+			byte[] rawMapData = zPackage.readLengthPrefixedByteArray();
+			mapData = new MinimapData(new ZPackage(rawMapData), hints);
+			mapData.setRawData(rawMapData);
 		}
 	}
 	
@@ -50,7 +52,7 @@ public class WorldPlayerData {
 		writer.writeVector3(homePoint);
 		writer.writeBool(mapData != null);
 		if(mapData != null) {
-			writer.writeLengthPrefixedObject(mapData::save);
+			writer.writeLengthPrefixedByteArray(mapData.serializePreservingRaw());
 		}
 	}
 }

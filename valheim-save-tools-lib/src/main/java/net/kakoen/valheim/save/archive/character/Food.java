@@ -13,6 +13,7 @@ public class Food {
 	private String name;
 	private float health;
 	private float stamina;
+	private float time;
 	
 	public Food(ZPackage reader) {
 		name = reader.readString();

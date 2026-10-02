@@ -9,8 +9,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.zip.CRC32;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -476,11 +478,27 @@ public class ZPackage implements AutoCloseable {
 		ZPackage newPackage = new ZPackage();
 		packageBuilder.accept(newPackage);
 
+		byte[] raw = newPackage.getBufferAsBytes();
+		// Write a deterministic gzip stream: fixed header (mtime 0, XFL 0, OS 255)
+		// instead of GZIPOutputStream, whose header OS byte differs between JVMs.
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try(GZIPOutputStream gzos = new GZIPOutputStream(baos)) {
-			newPackage.writeTo(gzos);
-		}
-		baos.close();
+		baos.write(new byte[]{0x1f, (byte) 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte) 0xff}, 0, 10);
+		Deflater deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, true);
+		DeflaterOutputStream dos = new DeflaterOutputStream(baos, deflater);
+		dos.write(raw);
+		dos.close();
+		CRC32 crc32 = new CRC32();
+		crc32.update(raw);
+		long crc = crc32.getValue();
+		baos.write((int) (crc & 0xff));
+		baos.write((int) ((crc >> 8) & 0xff));
+		baos.write((int) ((crc >> 16) & 0xff));
+		baos.write((int) ((crc >> 24) & 0xff));
+		int isize = raw.length & 0xffffffff;
+		baos.write(isize & 0xff);
+		baos.write((isize >> 8) & 0xff);
+		baos.write((isize >> 16) & 0xff);
+		baos.write((isize >> 24) & 0xff);
 		writeLengthPrefixedByteArray(baos.toByteArray());
 	}
 
